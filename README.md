@@ -49,8 +49,20 @@ Automatically applies:
 ```powershell
 git clone https://github.com/PabloPenguin/misp-ddos-cli.git
 cd misp-ddos-cli
+
+# If you have a corrupted venv, manually delete it first:
+# Remove-Item -Recurse -Force venv
+
 .\setup.ps1
 ```
+
+The `setup.ps1` script will:
+1. ✅ Create a virtual environment
+2. ✅ Install all dependencies (optimized for Python 3.8-3.13)
+3. ✅ Prompt you for MISP credentials (URL and API key)
+4. ✅ Test the connection to your MISP instance
+
+**Note**: The script will NOT overwrite an existing `.env` file. To reconfigure, delete `.env` first or answer "y" when prompted.
 
 **Linux/macOS:**
 ```bash
@@ -59,15 +71,8 @@ cd misp-ddos-cli
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your MISP credentials
+# You'll be prompted for credentials on first run
 ```
-
-The `setup.ps1` script automatically handles:
-- Virtual environment creation
-- Dependency installation (with Windows compatibility)
-- Environment configuration
-- Connection testing
 
 **See [QUICKSTART.md](QUICKSTART.md) for detailed 5-minute setup guide.**
 

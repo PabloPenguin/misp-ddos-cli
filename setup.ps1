@@ -16,43 +16,54 @@ Write-Host "Found: $pythonVersion" -ForegroundColor Green
 # Create virtual environment
 Write-Host ""
 Write-Host "Creating virtual environment..." -ForegroundColor Yellow
-if (Test-Path "venv") {
-    Write-Host "Virtual environment already exists. Skipping..." -ForegroundColor Yellow
-} else {
+if (-not (Test-Path "venv")) {
     python -m venv venv
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: Failed to create virtual environment" -ForegroundColor Red
+        exit 1
+    }
     Write-Host "Virtual environment created successfully." -ForegroundColor Green
+} else {
+    Write-Host "Virtual environment already exists." -ForegroundColor Green
 }
 
 # Activate virtual environment
 Write-Host ""
 Write-Host "Activating virtual environment..." -ForegroundColor Yellow
-& .\venv\Scripts\Activate.ps1
+$activateScript = Join-Path $PSScriptRoot "venv\Scripts\Activate.ps1"
+if (Test-Path $activateScript) {
+    & $activateScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: Failed to activate virtual environment" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Virtual environment activated." -ForegroundColor Green
+} else {
+    Write-Host "ERROR: Activation script not found" -ForegroundColor Red
+    Write-Host "Try deleting the venv folder and running setup again" -ForegroundColor Yellow
+    exit 1
+}
 
 # Upgrade pip
 Write-Host ""
 Write-Host "Upgrading pip and build tools..." -ForegroundColor Yellow
-python -m pip install --upgrade pip wheel setuptools | Out-Null
+python -m pip install --upgrade pip setuptools wheel --quiet
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: Failed to upgrade pip" -ForegroundColor Red
+    exit 1
+}
 
 # Install dependencies
 Write-Host ""
-Write-Host "Installing dependencies (using pre-built wheels)..." -ForegroundColor Yellow
-Write-Host "This may take a few minutes on first install..." -ForegroundColor Gray
-pip install --prefer-binary -r requirements.txt
+Write-Host "Installing dependencies..." -ForegroundColor Yellow
+Write-Host "This may take a minute..." -ForegroundColor Gray
+pip install -r requirements.txt --quiet --disable-pip-version-check
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Dependencies installed successfully." -ForegroundColor Green
 } else {
-    Write-Host "WARNING: Some dependencies failed. Trying minimal install..." -ForegroundColor Yellow
-    # Try installing without pandas if it fails
-    Get-Content requirements.txt | Where-Object { $_ -notmatch '^pandas' -and $_ -notmatch '^numpy' -and $_ -notmatch '^#' -and $_.Trim() -ne '' } | Set-Content requirements-minimal.txt
-    pip install -r requirements-minimal.txt
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "Minimal dependencies installed (CSV features will use basic parsing)." -ForegroundColor Yellow
-    } else {
-        Write-Host "ERROR: Failed to install dependencies." -ForegroundColor Red
-        Remove-Item requirements-minimal.txt -ErrorAction SilentlyContinue
-        exit 1
-    }
-    Remove-Item requirements-minimal.txt -ErrorAction SilentlyContinue
+    Write-Host "ERROR: Failed to install dependencies." -ForegroundColor Red
+    Write-Host "Please check the error messages above." -ForegroundColor Yellow
+    exit 1
 }
 
 # Check if .env exists

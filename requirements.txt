@@ -1,24 +1,29 @@
 # MISP DDoS CLI - Python Dependencies
-# Install with: pip install --prefer-binary -r requirements.txt
+# Install with: pip install -r requirements.txt
 
 # Core MISP and API
-pymisp==2.4.182
-requests==2.31.0
-python-dotenv==1.0.0
+pymisp>=2.4.182
+requests>=2.31.0
+python-dotenv>=1.0.0
 
 # CLI Framework
-click==8.1.7
-rich==13.7.0
-tabulate==0.9.0
+click>=8.1.7
+rich>=13.7.0
+tabulate>=0.9.0
 
 # Data Validation
-pydantic==2.10.5
-validators==0.22.0
+pydantic>=2.5.0
+validators>=0.22.0
 
-# CSV Processing - IMPORTANT: Install with --only-binary flag on Windows
-# If pandas/numpy fail to install, comment out these two lines and use basic CSV parsing
-pandas==2.1.4
-numpy==1.26.4
+# Common dependencies (auto-installed but listed for clarity)
+certifi>=2023.11.17
+charset-normalizer>=3.3.2
+idna>=3.6
+urllib3>=2.1.0,<3.0.0
+jsonschema>=4.20.0
+python-dateutil>=2.8.2
+pytz>=2023.3
+
 
 # Testing (dev dependencies)
 pytest==7.4.3
