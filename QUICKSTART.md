@@ -11,21 +11,28 @@ Get started in 5 minutes! ⚡
 
 ## Installation (Windows PowerShell)
 
-### Option 1: Automated Setup (Recommended)
+### Recommended: Automated Setup Script
+
+**Just run this:**
 
 ```powershell
-# Run the setup script
 .\setup.ps1
 ```
 
-This will:
-1. Check Python version
-2. Create virtual environment
-3. Install dependencies
-4. Create .env file
-5. Test MISP connection
+**What it does:**
+- ✅ Creates virtual environment
+- ✅ Installs all required dependencies
+- ✅ Handles Windows compatibility issues automatically
+- ✅ Skips pandas/numpy if your Python version doesn't support them (tool still works!)
+- ✅ Tests MISP connection
 
-### Option 2: Manual Setup
+**That's it!** The script handles everything, including Python 3.13 compatibility.
+
+---
+
+### Alternative: Manual Setup (Advanced Users Only)
+
+Only use this if the setup script fails or you want full control:
 
 ```powershell
 # 1. Create virtual environment
@@ -37,17 +44,18 @@ python -m venv venv
 # 3. Upgrade pip
 python -m pip install --upgrade pip wheel
 
-# 4. Install core dependencies (always works)
+# 4. Install REQUIRED dependencies (these always work)
 pip install pymisp requests python-dotenv click rich tabulate pydantic validators
 
-# 5. Try to install pandas/numpy (optional, for faster CSV processing)
+# 5. OPTIONAL: Try pandas/numpy (only works on Python 3.8-3.11)
 pip install --only-binary :all: pandas==2.1.4 numpy==1.26.4
-# Note: If this fails, CSV processing will use basic Python (slower but works)
+# If this fails, ignore it - the tool works without pandas/numpy
 
-# 6. Configure MISP connection
-# .env file already exists with correct credentials
-# Or copy from template:
-# cp .env.example .env
+# 6. Copy .env file
+copy .env.example .env
+
+# 7. Edit .env with your credentials
+notepad .env
 
 # 7. Test connection
 python main.py test-connection
