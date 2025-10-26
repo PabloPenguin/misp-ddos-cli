@@ -4,14 +4,21 @@ Get started in 5 minutes! ⚡
 
 ## Prerequisites
 
-- ✅ Python 3.8 or higher installed
-- ✅ Access to MISP instance (server1.tailaa85d9.ts.net)
+- ✅ Python 3.8 - 3.13+ installed (tested with 3.13.7)
+- ✅ Access to MISP instance
 - ✅ MISP API key
-- ✅ Tailscale connected (if applicable)
+- ✅ Network connectivity to MISP (Tailscale/VPN if applicable)
 
 ## Installation (Windows PowerShell)
 
-### Recommended: Automated Setup Script
+### Step 1: Clone the Repository
+
+```powershell
+git clone https://github.com/PabloPenguin/misp-ddos-cli.git
+cd misp-ddos-cli
+```
+
+### Step 2: Run Automated Setup
 
 **One-time setup - run this only once:**
 
@@ -19,22 +26,62 @@ Get started in 5 minutes! ⚡
 .\setup.ps1
 ```
 
-**What it does:**
-- ✅ Creates virtual environment
-- ✅ Installs all required dependencies
-- ✅ Handles Windows compatibility issues automatically
-- ✅ Skips pandas/numpy if your Python version doesn't support them (tool still works!)
-- ✅ Tests MISP connection
+**The script will:**
+1. ✅ Check Python version (3.8+ required)
+2. ✅ Create virtual environment (`venv` folder)
+3. ✅ Activate the virtual environment
+4. ✅ Upgrade pip and build tools
+5. ✅ Install all dependencies (pure Python, no compilation)
+6. ✅ Prompt you for MISP URL and API key
+7. ✅ Create `.env` configuration file
+8. ✅ Test connection to MISP instance
 
-**That's it!** The script handles everything, including Python 3.13 compatibility.
+**Interactive prompts you'll see:**
+```
+Enter MISP URL (e.g., https://server1.tailaa85d9.ts.net): [your MISP URL]
+Enter MISP API Key: [your API key]
+Enable SSL certificate verification?
+  [1] No  (for self-signed certificates)
+  [2] Yes (for production with valid certificates)
+Choice [1]: 1
+```
 
-⚠️ **You only run setup.ps1 once!** After initial setup, see "Daily Usage" below.
+**That's it!** The entire setup is automated.
+
+⚠️ **Important:** You only run `setup.ps1` once during initial installation!
 
 ---
 
-### Alternative: Manual Setup (Advanced Users Only)
+### Troubleshooting Setup
 
-Only use this if the setup script fails or you want full control:
+**Issue: "venv folder already exists" or "files are locked"**
+```powershell
+# Close all terminals and VS Code, then manually delete venv:
+# 1. Open File Explorer (Windows + E)
+# 2. Navigate to the project folder
+# 3. Delete the 'venv' folder
+# 4. Re-run: .\setup.ps1
+```
+
+**Issue: "No module named 'click'" after setup**
+```powershell
+# Virtual environment wasn't activated. Fix:
+.\venv\Scripts\Activate.ps1
+pip list  # Verify dependencies are installed
+```
+
+**Issue: Connection test fails**
+- Check Tailscale is connected (if using Tailscale)
+- Verify MISP URL and API key in `.env` file
+- Test network: `Test-NetConnection your-misp-url -Port 443`
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for comprehensive troubleshooting.
+
+---
+
+### Alternative: Manual Setup (Advanced Users)
+
+Only use this if the setup script fails:
 
 ```powershell
 # 1. Create virtual environment
@@ -44,23 +91,24 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 
 # 3. Upgrade pip
-python -m pip install --upgrade pip wheel
+pip install --upgrade pip setuptools wheel
 
-# 4. Install REQUIRED dependencies (these always work)
-pip install pymisp requests python-dotenv click rich tabulate pydantic validators
+# 4. Install dependencies
+pip install -r requirements.txt
 
-# 5. OPTIONAL: Try pandas/numpy (only works on Python 3.8-3.11)
-pip install --only-binary :all: pandas==2.1.4 numpy==1.26.4
-# If this fails, ignore it - the tool works without pandas/numpy
-
-# 6. Copy .env file
-copy .env.example .env
-
-# 7. Edit .env with your credentials
+# 5. Create .env file
 notepad .env
+```
 
-# 7. Test connection
-python main.py test-connection
+**Add to .env:**
+```ini
+MISP_URL=https://your-misp-instance.com
+MISP_API_KEY=your-api-key-here
+MISP_VERIFY_SSL=false
+MISP_TIMEOUT=30
+MISP_MAX_RETRIES=3
+LOG_LEVEL=INFO
+LOG_FILE=misp_cli.log
 ```
 
 ---
@@ -71,18 +119,21 @@ python main.py test-connection
 
 ```powershell
 # 1. Navigate to the project folder
-cd path\to\misp-ddos-cli
+cd C:\path\to\misp-ddos-cli
 
 # 2. Activate the virtual environment (REQUIRED)
 .\venv\Scripts\Activate.ps1
 
-# 3. Now use the tool normally
-python main.py interactive
-python main.py bulk events.csv
+# You should see (venv) in your prompt:
+# (venv) PS C:\path\to\misp-ddos-cli>
+
+# 3. Now use the tool
+python main.py --help
 python main.py test-connection
+python main.py interactive
 ```
 
-**That's it!** Just activate the venv, then use the tool.
+💡 **Remember:** Always activate the virtual environment first!
 
 ---
 
@@ -91,11 +142,20 @@ python main.py test-connection
 ### 1. Test Connection
 
 ```powershell
-# Make sure venv is activated first!
+# Make sure venv is activated (you'll see (venv) in prompt)
 .\venv\Scripts\Activate.ps1
 
-# Then test
+# Test MISP connection
 python main.py test-connection
+```
+
+**Expected output:**
+```
+Testing MISP connection...
+MISP URL: https://your-misp-instance.com
+SSL Verification: False
+✅ Connection successful!
+MISP instance is accessible and API key is valid
 ```
 
 Expected output:

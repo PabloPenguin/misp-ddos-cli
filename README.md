@@ -37,9 +37,10 @@ Automatically applies:
 
 ## 📋 Requirements
 
-- **Python**: 3.8 or higher
+- **Python**: 3.8 - 3.13+ (tested with 3.13.7)
 - **MISP Instance**: Accessible MISP server with API access
 - **Network**: Connectivity to MISP instance (Tailscale, VPN, or direct)
+- **Dependencies**: All have pre-built wheels (no compilation required)
 
 ## 🚀 Installation
 
@@ -49,20 +50,22 @@ Automatically applies:
 ```powershell
 git clone https://github.com/PabloPenguin/misp-ddos-cli.git
 cd misp-ddos-cli
-
-# If you have a corrupted venv, manually delete it first:
-# Remove-Item -Recurse -Force venv
-
 .\setup.ps1
 ```
 
 The `setup.ps1` script will:
 1. ✅ Create a virtual environment
-2. ✅ Install all dependencies (optimized for Python 3.8-3.13)
+2. ✅ Install all dependencies (compatible with Python 3.8-3.13+)
 3. ✅ Prompt you for MISP credentials (URL and API key)
-4. ✅ Test the connection to your MISP instance
+4. ✅ Create `.env` configuration file
+5. ✅ Test the connection to your MISP instance
 
 **Note**: The script will NOT overwrite an existing `.env` file. To reconfigure, delete `.env` first or answer "y" when prompted.
+
+**Troubleshooting Setup:**
+- If dependencies fail to install, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+- If you get "module not found" errors, delete `venv` folder and re-run `.\setup.ps1`
+- Make sure to activate the virtual environment: `.\venv\Scripts\Activate.ps1`
 
 **Linux/macOS:**
 ```bash
@@ -71,7 +74,7 @@ cd misp-ddos-cli
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-# You'll be prompted for credentials on first run
+python main.py test-connection  # Will prompt for credentials
 ```
 
 **See [QUICKSTART.md](QUICKSTART.md) for detailed 5-minute setup guide.**
@@ -104,40 +107,30 @@ source venv/bin/activate
 
 #### 3. Install Dependencies
 
-**Windows (Python 3.8-3.11):**
-```powershell
-pip install -r requirements.txt
-```
-
-**Windows (Python 3.12+):**
-```powershell
-# Core dependencies (required)
-pip install pymisp requests python-dotenv click rich tabulate pydantic validators
-
-# pandas/numpy (optional - not available for Python 3.12+)
-# Tool works without these, just uses basic CSV parsing
-```
-
-**Linux/macOS:**
+**All Platforms (Python 3.8-3.13+):**
 ```bash
+pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
+
+**Note:** pandas and numpy have been removed from this project. CSV processing uses Python's built-in `csv` module for maximum compatibility.
 
 #### 4. Configure Environment
 
-```bash
-# Copy example environment file
-cp .env.example .env
+Create a `.env` file in the project root:
 
-# Edit .env with your MISP details
+```bash
+# Manual creation
+notepad .env  # Windows
+nano .env     # Linux/macOS
 ```
 </details>
 
 #### Required Configuration (.env)
 
-```bash
+```ini
 # MISP Instance Configuration
-MISP_URL=https://server1.tailaa85d9.ts.net
+MISP_URL=https://your-misp-instance.com
 MISP_API_KEY=your_api_key_here
 
 # Security Settings
@@ -148,6 +141,56 @@ MISP_MAX_RETRIES=3
 # Optional: Logging
 LOG_LEVEL=INFO
 LOG_FILE=misp_cli.log
+```
+
+---
+
+## 📦 Dependencies
+
+### Core Dependencies (Always Installed)
+All dependencies are pure Python with pre-built wheels for Windows/Linux/macOS:
+
+- **pymisp** (>=2.4.182) - MISP API client
+- **requests** (>=2.31.0) - HTTP library
+- **python-dotenv** (>=1.0.0) - Environment variable management
+- **click** (>=8.1.7) - CLI framework
+- **rich** (>=13.7.0) - Beautiful terminal formatting
+- **tabulate** (>=0.9.0) - Table output
+- **pydantic** (>=2.5.0) - Data validation
+- **validators** (>=0.22.0) - Input validation utilities
+
+**Total installation size:** ~50MB (vs ~250MB with pandas/numpy)
+
+### Development Dependencies (Optional)
+```bash
+pip install -r requirements-dev.txt
+```
+
+- **pytest** (>=7.4.3) - Testing framework
+- **pytest-cov** (>=4.1.0) - Coverage reporting
+- **pytest-mock** (>=3.12.0) - Mocking utilities
+- **responses** (>=0.24.1) - HTTP response mocking
+
+### What's NOT Included (Intentionally)
+
+**pandas and numpy** were removed because:
+- ❌ No pre-built wheels for Python 3.13 on Windows
+- ❌ Require Visual Studio Build Tools to compile
+- ❌ Add ~200MB to installation size
+- ✅ Not needed - Python's `csv` module handles all CSV operations
+- ✅ Built-in `csv.DictReader` is faster for our use case
+
+**CSV processing** uses stdlib only:
+- `csv.DictReader` - Read CSV files
+- `pathlib.Path` - File handling
+- `re` - Pattern matching for validation
+- `datetime` - Date parsing
+
+**Result:** Zero compilation dependencies, works on all Python versions 3.8-3.13+
+
+---
+
+## 📖 Usage
 ```
 
 ⚠️ **Security Note**: Never commit `.env` to version control!

@@ -1,6 +1,3 @@
-# Ignore requirements and development notes
-Requirements.MD
-
 # Python
 __pycache__/
 *.py[cod]
