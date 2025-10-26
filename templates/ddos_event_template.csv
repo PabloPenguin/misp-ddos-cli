@@ -1,0 +1,19 @@
+# MISP DDoS Event Bulk Upload Template
+# Follow the Streamlined MISP DDoS Playbook for consistency
+#
+# INSTRUCTIONS:
+# 1. Fill in one row per DDoS event
+# 2. Required fields are marked with *
+# 3. Use semicolon (;) to separate multiple values in array fields
+# 4. TLP options: green, amber, red, clear (default: green)
+# 5. Workflow options: new, in-progress, reviewed, closed (default: new)
+# 6. Attack types: direct-flood (T1498.001), amplification (T1498.002), or both
+# 7. Date format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS
+#
+# EXAMPLE ROW (remove this line before uploading):
+# 2024-01-15,DDoS Campaign Against Finance Sector,green,new,direct-flood,192.168.1.100;192.168.1.101,80;443,10.0.0.50,443,Large-scale DDoS attack targeting online banking,high
+#
+# CSV COLUMNS:
+# date*,event_name*,tlp,workflow_state,attack_type*,attacker_ips*,attacker_ports,victim_ip*,victim_port*,description*,confidence_level
+
+date,event_name,tlp,workflow_state,attack_type,attacker_ips,attacker_ports,victim_ip,victim_port,description,confidence_level

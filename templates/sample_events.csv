@@ -1,0 +1,20 @@
+# MISP DDoS Event Sample Data
+# This file contains sample CSV rows for testing the bulk upload feature
+# 
+# INSTRUCTIONS:
+# 1. Copy the CSV rows below (without the # comments) into a new file
+# 2. Save as: sample_events.csv
+# 3. Run: python main.py bulk sample_events.csv --dry-run
+# 4. If validation passes, run: python main.py bulk sample_events.csv
+#
+# NOTE: These are example events with fictional data for testing purposes
+
+date,event_name,tlp,workflow_state,attack_type,attacker_ips,attacker_ports,victim_ip,victim_port,description,confidence_level
+2024-10-26,Web Server Volumetric Attack,green,new,direct-flood,203.0.113.10;203.0.113.11;203.0.113.12,80;443;8080,198.51.100.50,443,Large-scale HTTP flood targeting e-commerce platform during peak hours. Approx 100Gbps traffic sustained for 2 hours.,high
+2024-10-26,DNS Amplification Campaign,green,new,amplification,203.0.113.20;203.0.113.21,53,198.51.100.51,53,DNS amplification attack using misconfigured open resolvers. Amplification factor estimated at 50x.,high
+2024-10-26,Multi-Vector DDoS Attack,green,in-progress,both,203.0.113.30;203.0.113.31;203.0.113.32;203.0.113.33,,198.51.100.52,80,Coordinated attack combining volumetric floods and application-layer attacks. Investigation ongoing.,medium
+2024-10-25,NTP Amplification,green,reviewed,amplification,203.0.113.40,123,198.51.100.53,123,NTP amplification attack exploiting monlist command. Attack mitigated by upstream provider.,high
+2024-10-25,SYN Flood Attack,green,closed,direct-flood,203.0.113.50;203.0.113.51,,,198.51.100.54,443,Classic SYN flood targeting HTTPS service. Mitigated with SYN cookies. Case closed.,high
+2024-10-24,Memcached Amplification,amber,reviewed,amplification,203.0.113.60,11211,198.51.100.55,80,Memcached amplification with extremely high amplification factor (50000x). Limited sharing due to ongoing investigation.,high
+2024-10-24,SSDP Reflection Attack,green,new,amplification,203.0.113.70;203.0.113.71;203.0.113.72,1900,198.51.100.56,443,SSDP reflection attack using vulnerable IoT devices. Botnet of approximately 10000 devices.,medium
+2024-10-23,Gaming Server DDoS,green,closed,direct-flood,203.0.113.80;203.0.113.81,,,198.51.100.57,25565,UDP flood targeting Minecraft server. Attack lasted 30 minutes. Service restored.,high
