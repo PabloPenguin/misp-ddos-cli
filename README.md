@@ -43,14 +43,49 @@ Automatically applies:
 
 ## 🚀 Installation
 
-### 1. Clone the Repository
+### Quick Start (Recommended)
+
+**Windows PowerShell:**
+```powershell
+git clone https://github.com/PabloPenguin/misp-ddos-cli.git
+cd misp-ddos-cli
+.\setup.ps1
+```
+
+**Linux/macOS:**
+```bash
+git clone https://github.com/PabloPenguin/misp-ddos-cli.git
+cd misp-ddos-cli
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env with your MISP credentials
+```
+
+The `setup.ps1` script automatically handles:
+- Virtual environment creation
+- Dependency installation (with Windows compatibility)
+- Environment configuration
+- Connection testing
+
+**See [QUICKSTART.md](QUICKSTART.md) for detailed 5-minute setup guide.**
+
+---
+
+### Manual Installation (Advanced)
+
+<details>
+<summary>Click to expand manual installation steps</summary>
+
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/PabloPenguin/misp-ddos-cli.git
 cd misp-ddos-cli
 ```
 
-### 2. Create Virtual Environment
+#### 2. Create Virtual Environment
 
 ```powershell
 # Windows PowerShell
@@ -62,26 +97,36 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+#### 3. Install Dependencies
 
-```bash
-# Install all dependencies with pinned versions
+**Windows (Python 3.8-3.11):**
+```powershell
 pip install -r requirements.txt
-
-# For development, you may want to upgrade pip first
-python -m pip install --upgrade pip
 ```
 
-### 4. Configure Environment
+**Windows (Python 3.12+):**
+```powershell
+# Core dependencies (required)
+pip install pymisp requests python-dotenv click rich tabulate pydantic validators
+
+# pandas/numpy (optional - not available for Python 3.12+)
+# Tool works without these, just uses basic CSV parsing
+```
+
+**Linux/macOS:**
+```bash
+pip install -r requirements.txt
+```
+
+#### 4. Configure Environment
 
 ```bash
 # Copy example environment file
 cp .env.example .env
 
 # Edit .env with your MISP details
-# Windows: notepad .env
-# Linux/macOS: nano .env
 ```
+</details>
 
 #### Required Configuration (.env)
 
