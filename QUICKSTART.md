@@ -13,7 +13,7 @@ Get started in 5 minutes! ⚡
 
 ### Recommended: Automated Setup Script
 
-**Just run this:**
+**One-time setup - run this only once:**
 
 ```powershell
 .\setup.ps1
@@ -27,6 +27,8 @@ Get started in 5 minutes! ⚡
 - ✅ Tests MISP connection
 
 **That's it!** The script handles everything, including Python 3.13 compatibility.
+
+⚠️ **You only run setup.ps1 once!** After initial setup, see "Daily Usage" below.
 
 ---
 
@@ -61,11 +63,38 @@ notepad .env
 python main.py test-connection
 ```
 
+---
+
+## Daily Usage
+
+**Every time you open a new PowerShell window:**
+
+```powershell
+# 1. Navigate to the project folder
+cd path\to\misp-ddos-cli
+
+# 2. Activate the virtual environment (REQUIRED)
+.\venv\Scripts\Activate.ps1
+
+# 3. Now use the tool normally
+python main.py interactive
+python main.py bulk events.csv
+python main.py test-connection
+```
+
+**That's it!** Just activate the venv, then use the tool.
+
+---
+
 ## First Steps
 
 ### 1. Test Connection
 
 ```powershell
+# Make sure venv is activated first!
+.\venv\Scripts\Activate.ps1
+
+# Then test
 python main.py test-connection
 ```
 
