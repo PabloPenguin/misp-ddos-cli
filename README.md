@@ -147,9 +147,32 @@ LOG_FILE=misp_cli.log
 
 ⚠️ **Security Note**: Never commit `.env` to version control!
 
+---
+
 ## 📖 Usage
 
-### Test Connection
+### Daily Usage
+
+**Every time you want to use the tool:**
+
+```powershell
+# Windows - Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+# Linux/macOS - Activate virtual environment  
+source venv/bin/activate
+
+# Now use the tool
+python main.py --help
+```
+
+💡 **Note**: You only run `setup.ps1` once during installation. For daily use, just activate the virtual environment.
+
+---
+
+### Quick Examples
+
+#### Test Connection
 
 First, verify your MISP connection:
 
@@ -157,7 +180,7 @@ First, verify your MISP connection:
 python main.py test-connection
 ```
 
-### Interactive Mode
+#### Interactive Mode
 
 Create events manually with guided prompts:
 
