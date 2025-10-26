@@ -173,6 +173,50 @@ Reinstall dependencies:
 pip install -r requirements.txt --force-reinstall
 ```
 
+### Windows Installation Issues
+
+**Problem: "Could not find vswhere.exe" or pandas build error**
+
+This occurs when Visual Studio Build Tools aren't installed. Try these solutions:
+
+**Solution 1: Use older pandas version (recommended)**
+```powershell
+# Already fixed in requirements.txt
+pip install pandas==2.1.4
+```
+
+**Solution 2: Install with pre-built wheels**
+```powershell
+pip install --prefer-binary -r requirements.txt
+```
+
+**Solution 3: Run setup script (handles this automatically)**
+```powershell
+.\setup.ps1
+```
+
+**Problem: "ModuleNotFoundError: No module named 'click'"**
+
+This means dependencies didn't install. Solution:
+
+```powershell
+# Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+# Install dependencies manually with pre-built wheels
+pip install --prefer-binary -r requirements.txt
+
+# Or install core dependencies individually
+pip install click rich pymisp python-dotenv requests
+```
+
+**Problem: Setup script execution policy error**
+
+```powershell
+# Run this first, then run setup.ps1
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
 ## Next Steps
 
 - 📖 Read the full [README.md](README.md) for detailed documentation

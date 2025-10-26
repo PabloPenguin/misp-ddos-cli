@@ -30,18 +30,29 @@ Write-Host "Activating virtual environment..." -ForegroundColor Yellow
 
 # Upgrade pip
 Write-Host ""
-Write-Host "Upgrading pip..." -ForegroundColor Yellow
-python -m pip install --upgrade pip | Out-Null
+Write-Host "Upgrading pip and build tools..." -ForegroundColor Yellow
+python -m pip install --upgrade pip wheel setuptools | Out-Null
 
 # Install dependencies
 Write-Host ""
-Write-Host "Installing dependencies..." -ForegroundColor Yellow
-pip install -r requirements.txt
+Write-Host "Installing dependencies (using pre-built wheels)..." -ForegroundColor Yellow
+Write-Host "This may take a few minutes on first install..." -ForegroundColor Gray
+pip install --prefer-binary -r requirements.txt
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Dependencies installed successfully." -ForegroundColor Green
 } else {
-    Write-Host "ERROR: Failed to install dependencies." -ForegroundColor Red
-    exit 1
+    Write-Host "WARNING: Some dependencies failed. Trying minimal install..." -ForegroundColor Yellow
+    # Try installing without pandas if it fails
+    Get-Content requirements.txt | Where-Object { $_ -notmatch '^pandas' -and $_ -notmatch '^numpy' -and $_ -notmatch '^#' -and $_.Trim() -ne '' } | Set-Content requirements-minimal.txt
+    pip install -r requirements-minimal.txt
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Minimal dependencies installed (CSV features will use basic parsing)." -ForegroundColor Yellow
+    } else {
+        Write-Host "ERROR: Failed to install dependencies." -ForegroundColor Red
+        Remove-Item requirements-minimal.txt -ErrorAction SilentlyContinue
+        exit 1
+    }
+    Remove-Item requirements-minimal.txt -ErrorAction SilentlyContinue
 }
 
 # Check if .env exists
