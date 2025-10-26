@@ -218,10 +218,10 @@ class MISPClient:
         """
         try:
             # Try to get MISP version as a connection test
-            version = self.client.get_version()
+            version = self.client.misp_instance_version
             logger.info(
                 "Successfully connected to MISP",
-                extra={"version": version.get("version", "unknown")}
+                extra={"version": version.get("version", "unknown") if isinstance(version, dict) else str(version)}
             )
         except Exception as e:
             logger.error(
