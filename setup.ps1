@@ -37,22 +37,30 @@ python -m pip install --upgrade pip wheel setuptools | Out-Null
 Write-Host ""
 Write-Host "Installing dependencies (using pre-built wheels)..." -ForegroundColor Yellow
 Write-Host "This may take a few minutes on first install..." -ForegroundColor Gray
-pip install --prefer-binary -r requirements.txt
+
+# First install core dependencies without pandas/numpy
+Write-Host "Installing core dependencies..." -ForegroundColor Gray
+pip install pymisp requests python-dotenv click rich tabulate pydantic validators --quiet
+
+# Try to install pandas and numpy with binary-only flag
+Write-Host "Installing pandas and numpy (binary wheels only)..." -ForegroundColor Gray
+$pandasInstalled = $false
+pip install --only-binary :all: pandas==2.1.4 numpy==1.26.4 2>$null
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "Dependencies installed successfully." -ForegroundColor Green
+    Write-Host "✓ pandas and numpy installed successfully" -ForegroundColor Green
+    $pandasInstalled = $true
 } else {
-    Write-Host "WARNING: Some dependencies failed. Trying minimal install..." -ForegroundColor Yellow
-    # Try installing without pandas if it fails
-    Get-Content requirements.txt | Where-Object { $_ -notmatch '^pandas' -and $_ -notmatch '^numpy' -and $_ -notmatch '^#' -and $_.Trim() -ne '' } | Set-Content requirements-minimal.txt
-    pip install -r requirements-minimal.txt
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "Minimal dependencies installed (CSV features will use basic parsing)." -ForegroundColor Yellow
-    } else {
-        Write-Host "ERROR: Failed to install dependencies." -ForegroundColor Red
-        Remove-Item requirements-minimal.txt -ErrorAction SilentlyContinue
-        exit 1
-    }
-    Remove-Item requirements-minimal.txt -ErrorAction SilentlyContinue
+    Write-Host "⚠ pandas/numpy not available as pre-built wheels for your Python version" -ForegroundColor Yellow
+    Write-Host "  CSV processing will use basic Python (slower but functional)" -ForegroundColor Yellow
+}
+
+# Verify core dependencies are installed
+python -c "import click, rich, pymisp" 2>$null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ Core dependencies installed successfully" -ForegroundColor Green
+} else {
+    Write-Host "❌ Failed to install core dependencies" -ForegroundColor Red
+    exit 1
 }
 
 # Check if .env exists

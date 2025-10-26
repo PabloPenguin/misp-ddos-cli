@@ -34,15 +34,22 @@ python -m venv venv
 # 2. Activate virtual environment
 .\venv\Scripts\Activate.ps1
 
-# 3. Install dependencies
-pip install -r requirements.txt
+# 3. Upgrade pip
+python -m pip install --upgrade pip wheel
 
-# 4. Configure MISP connection
+# 4. Install core dependencies (always works)
+pip install pymisp requests python-dotenv click rich tabulate pydantic validators
+
+# 5. Try to install pandas/numpy (optional, for faster CSV processing)
+pip install --only-binary :all: pandas==2.1.4 numpy==1.26.4
+# Note: If this fails, CSV processing will use basic Python (slower but works)
+
+# 6. Configure MISP connection
 # .env file already exists with correct credentials
 # Or copy from template:
 # cp .env.example .env
 
-# 5. Test connection
+# 7. Test connection
 python main.py test-connection
 ```
 
@@ -177,23 +184,28 @@ pip install -r requirements.txt --force-reinstall
 
 **Problem: "Could not find vswhere.exe" or pandas build error**
 
-This occurs when Visual Studio Build Tools aren't installed. Try these solutions:
+This occurs when trying to build pandas/numpy from source without Visual Studio Build Tools.
 
-**Solution 1: Use older pandas version (recommended)**
+**Solution: Install core dependencies only (pandas/numpy optional)**
+
 ```powershell
-# Already fixed in requirements.txt
-pip install pandas==2.1.4
+# Activate virtual environment
+.\venv\Scripts\Activate.ps1
+
+# Install core dependencies (required - always works)
+pip install pymisp requests python-dotenv click rich tabulate pydantic validators
+
+# Try pandas/numpy (optional - only if pre-built wheels available)
+pip install --only-binary :all: pandas==2.1.4 numpy==1.26.4
 ```
 
-**Solution 2: Install with pre-built wheels**
-```powershell
-pip install --prefer-binary -r requirements.txt
-```
+**If pandas/numpy fail to install, that's OK!** The tool will work with basic CSV parsing.
 
-**Solution 3: Run setup script (handles this automatically)**
-```powershell
-.\setup.ps1
-```
+**Solution 2: Use older Python version**
+
+Pandas 2.1.4 pre-built wheels are available for Python 3.8-3.11. If you're on Python 3.12+, either:
+- Use Python 3.11 instead, OR
+- Skip pandas/numpy (tool still works without them)
 
 **Problem: "ModuleNotFoundError: No module named 'click'"**
 
