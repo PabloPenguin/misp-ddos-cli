@@ -409,5 +409,190 @@ def test_connection(ctx):
         sys.exit(1)
 
 
+@cli.command()
+@click.option(
+    '--output',
+    '-o',
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help='Output JSON file path (default: misp_events_export_YYYY-MM-DD_HHMMSS.json)'
+)
+@click.option(
+    '--pretty',
+    is_flag=True,
+    help='Pretty-print JSON output with indentation'
+)
+@click.pass_context
+def export(ctx, output: Optional[Path], pretty: bool):
+    """
+    Export all MISP events to JSON format.
+    
+    Retrieves all events from the MISP instance with complete details including
+    all attributes, objects, tags, galaxies, and metadata. The output JSON is
+    designed for easy ingestion into SIEM systems and sharing with other organizations.
+    
+    \b
+    Features:
+        • Exports ALL events visible to your API key
+        • Includes complete event details (attributes, objects, tags, galaxies)
+        • SIEM-ready JSON format
+        • Optional pretty-printing for human readability
+        • Automatic timestamped filename
+    
+    \b
+    Security Notes:
+        • Only exports events accessible with your API key permissions
+        • Consider filtering by TLP level if sharing externally
+        • Review exported data before sharing with other organizations
+    
+    Examples:
+    
+    \b
+        # Export to timestamped file
+        python main.py export
+        
+        # Export to specific file
+        python main.py export -o events.json
+        
+        # Export with pretty formatting
+        python main.py export --pretty
+        
+        # Custom output with formatting
+        python main.py export -o export/misp_events.json --pretty
+    """
+    try:
+        print_banner()
+        
+        config = ctx.obj['config']
+        
+        # Generate default filename with timestamp if not provided
+        if output is None:
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+            output = Path(f"misp_events_export_{timestamp}.json")
+        
+        # Create output directory if it doesn't exist
+        output_dir = output.parent
+        if output_dir and not output_dir.exists():
+            output_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Created output directory: {output_dir}")
+        
+        console.print("\n[bold cyan]📥 MISP Event Export[/bold cyan]\n")
+        console.print(f"[dim]Output file:[/dim] {output.absolute()}")
+        console.print(f"[dim]Pretty print:[/dim] {'Yes' if pretty else 'No'}\n")
+        
+        # Initialize MISP client
+        logger.info("Connecting to MISP instance...")
+        console.print("[cyan]🔗 Connecting to MISP instance...[/cyan]")
+        
+        misp_client = MISPClient(
+            url=config.misp_url,
+            api_key=config.misp_api_key,
+            verify_ssl=config.misp_verify_ssl,
+            timeout=config.misp_timeout,
+            max_retries=config.misp_max_retries
+        )
+        
+        console.print("[green]✓[/green] Connected successfully\n")
+        
+        # Export all events
+        console.print("[cyan]📤 Exporting all events from MISP...[/cyan]")
+        console.print("[dim]This may take a while for large MISP instances...[/dim]\n")
+        
+        with console.status("[cyan]Fetching events..."):
+            events = misp_client.export_all_events()
+        
+        # Display export statistics
+        console.print(f"[green]✓[/green] Successfully retrieved [bold cyan]{len(events)}[/bold cyan] events\n")
+        
+        # Calculate statistics
+        total_attributes = sum(len(event.get('Attribute', [])) for event in events)
+        total_objects = sum(len(event.get('Object', [])) for event in events)
+        
+        from rich.table import Table
+        stats_table = Table(show_header=True, header_style="bold cyan")
+        stats_table.add_column("Metric", style="cyan")
+        stats_table.add_column("Count", justify="right", style="white")
+        
+        stats_table.add_row("Events", str(len(events)))
+        stats_table.add_row("Total Attributes", str(total_attributes))
+        stats_table.add_row("Total Objects", str(total_objects))
+        
+        console.print(stats_table)
+        console.print()
+        
+        # Write to JSON file
+        console.print(f"[cyan]💾 Writing to JSON file...[/cyan]")
+        
+        import json
+        
+        try:
+            with open(output, 'w', encoding='utf-8') as f:
+                if pretty:
+                    json.dump(events, f, indent=2, ensure_ascii=False)
+                else:
+                    json.dump(events, f, ensure_ascii=False)
+            
+            # Get file size
+            file_size = output.stat().st_size
+            if file_size < 1024:
+                size_str = f"{file_size} bytes"
+            elif file_size < 1024 * 1024:
+                size_str = f"{file_size / 1024:.2f} KB"
+            else:
+                size_str = f"{file_size / (1024 * 1024):.2f} MB"
+            
+            console.print(f"[green]✓[/green] Export complete!\n")
+            console.print(f"[bold green]📄 File saved:[/bold green] {output.absolute()}")
+            console.print(f"[dim]File size:[/dim] {size_str}\n")
+            
+            console.print("[bold cyan]Next Steps:[/bold cyan]")
+            console.print("  • Review the exported JSON file")
+            console.print("  • Import into your SIEM or analysis platform")
+            console.print("  • Share with other organizations as needed")
+            console.print("  • Consider filtering by TLP level before sharing\n")
+            
+            logger.info(
+                "Export completed successfully",
+                extra={
+                    "output_file": str(output.absolute()),
+                    "event_count": len(events),
+                    "file_size_bytes": file_size
+                }
+            )
+            
+            sys.exit(0)
+        
+        except IOError as e:
+            console.print(f"\n[bold red]❌ Failed to write output file:[/bold red]")
+            console.print(f"[red]{str(e)}[/red]\n")
+            console.print("[yellow]Troubleshooting:[/yellow]")
+            console.print("  • Check write permissions for output directory")
+            console.print("  • Ensure sufficient disk space")
+            console.print("  • Verify output path is valid")
+            logger.exception("Failed to write export file")
+            sys.exit(1)
+    
+    except MISPConnectionError as e:
+        console.print(f"\n[bold red]❌ MISP Connection Error:[/bold red]")
+        console.print(f"[red]{str(e)}[/red]")
+        console.print("\n[yellow]Troubleshooting:[/yellow]")
+        console.print("  • Verify MISP_URL is correct in .env")
+        console.print("  • Check MISP_API_KEY is valid")
+        console.print("  • Ensure MISP instance is accessible")
+        console.print("  • Check network/firewall settings")
+        sys.exit(1)
+    
+    except KeyboardInterrupt:
+        console.print("\n\n[yellow]Export cancelled by user[/yellow]")
+        sys.exit(130)
+    
+    except Exception as e:
+        console.print(f"\n[bold red]❌ Unexpected Error:[/bold red]")
+        console.print(f"[red]{str(e)}[/red]")
+        logger.exception("Unexpected error during export")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli(obj={})

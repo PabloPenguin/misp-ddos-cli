@@ -523,3 +523,113 @@ class MISPClient:
                 exc_info=True
             )
             raise MISPConnectionError(f"Failed to search events: {str(e)}") from e
+    
+    @retry_with_backoff(max_attempts=3)
+    def export_all_events(self) -> List[Dict[str, Any]]:
+        """
+        Export all MISP events with full details including all attributes and objects.
+        
+        This method retrieves all events from the MISP instance with complete information
+        including attributes, objects, tags, galaxies, and related metadata. The output
+        is designed to be compatible with SIEM ingestion and cross-organization sharing.
+        
+        Returns:
+            List of complete event dictionaries with all attributes and objects
+        
+        Raises:
+            MISPConnectionError: If export fails
+        
+        Security Note:
+            - This retrieves ALL events visible to the API key
+            - Ensure proper filtering if only certain TLP levels should be exported
+            - Large MISP instances may take time to export
+        
+        Performance Note:
+            - May be slow for large MISP instances (1000+ events)
+            - Consider using pagination for very large exports
+            - Memory usage scales with number of events
+        
+        Example:
+            >>> client = MISPClient(url, api_key)
+            >>> events = client.export_all_events()
+            >>> len(events)
+            42
+        """
+        start_time = time.time()
+        
+        try:
+            logger.info("Starting full event export from MISP")
+            
+            # Use search with minimal filters to get all events
+            # The 'all' parameter ensures we get complete event details
+            events = self.client.search(
+                controller='events',
+                return_format='json',
+                pythonify=False,  # Get raw dict for complete data
+                metadata=False,   # Get full events, not just metadata
+                published=None,   # Include both published and unpublished
+                to_ids=None,      # Include all attributes regardless of to_ids flag
+                enforce_warninglist=False  # Don't filter based on warninglists
+            )
+            
+            # Handle different response formats from PyMISP
+            if isinstance(events, dict):
+                # Response is a dict with 'response' key containing events
+                if 'response' in events:
+                    event_list = events['response']
+                elif 'Event' in events:
+                    # Single event returned
+                    event_list = [events]
+                else:
+                    event_list = [events]
+            elif isinstance(events, list):
+                event_list = events
+            else:
+                logger.warning(
+                    f"Unexpected response type from MISP: {type(events)}",
+                    extra={"response_type": str(type(events))}
+                )
+                event_list = []
+            
+            # Extract events from wrapper if needed
+            processed_events = []
+            for event in event_list:
+                if isinstance(event, dict):
+                    # If event is wrapped in 'Event' key, extract it
+                    if 'Event' in event:
+                        processed_events.append(event['Event'])
+                    else:
+                        processed_events.append(event)
+            
+            duration = time.time() - start_time
+            logger.info(
+                "Successfully exported all MISP events",
+                extra={
+                    "event_count": len(processed_events),
+                    "duration_seconds": duration
+                }
+            )
+            
+            return processed_events
+            
+        except PyMISPError as e:
+            logger.error(
+                "Failed to export MISP events",
+                extra={
+                    "error": str(e),
+                    "error_type": type(e).__name__
+                },
+                exc_info=True
+            )
+            raise MISPConnectionError(f"Failed to export events: {str(e)}") from e
+        
+        except Exception as e:
+            logger.error(
+                "Unexpected error exporting MISP events",
+                extra={
+                    "error": str(e),
+                    "error_type": type(e).__name__
+                },
+                exc_info=True
+            )
+            raise MISPClientError(f"Unexpected error during export: {str(e)}") from e
