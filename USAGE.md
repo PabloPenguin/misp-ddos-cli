@@ -7,10 +7,11 @@ This guide provides comprehensive examples and workflows for using the MISP DDoS
 1. [Quick Start](#quick-start)
 2. [Interactive Mode Examples](#interactive-mode-examples)
 3. [Bulk Upload Examples](#bulk-upload-examples)
-4. [CSV Template Guide](#csv-template-guide)
-5. [Common Workflows](#common-workflows)
-6. [Error Handling](#error-handling)
-7. [Best Practices](#best-practices)
+4. [Export Events Examples](#export-events-examples)
+5. [CSV Template Guide](#csv-template-guide)
+6. [Common Workflows](#common-workflows)
+7. [Error Handling](#error-handling)
+8. [Best Practices](#best-practices)
 
 ## Quick Start
 
@@ -230,6 +231,159 @@ python main.py bulk events.csv --no-continue-on-error
 
 **Use Case:** Strict validation for production uploads.
 
+## Export Events Examples
+
+### Example 1: Basic Export
+
+Export all MISP events to JSON with automatic timestamped filename:
+
+```bash
+python main.py export
+```
+
+**Output:**
+```
+📥 MISP Event Export
+
+Output file: C:\path\to\misp_events_export_2024-10-27_143025.json
+Pretty print: No
+
+🔗 Connecting to MISP instance...
+✓ Connected successfully
+
+📤 Exporting all events from MISP...
+✓ Successfully retrieved 249 events
+
+┏━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Metric           ┃ Count ┃
+┡━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ Events           │   249 │
+│ Total Attributes │  1461 │
+│ Total Objects    │   117 │
+└──────────────────┴───────┘
+
+💾 Writing to JSON file...
+✓ Export complete!
+
+📄 File saved: C:\path\to\misp_events_export_2024-10-27_143025.json
+File size: 25.49 MB
+```
+
+### Example 2: Pretty-Printed Export
+
+Export with human-readable JSON formatting:
+
+```bash
+python main.py export -o misp_events.json --pretty
+```
+
+**Benefits:**
+- ✅ Indented JSON (easier to read/debug)
+- ✅ Better for version control diffs
+- ⚠️ Larger file size (~30-40% increase)
+
+**File Size Comparison:**
+- Compact: 25.49 MB
+- Pretty: 37.26 MB
+
+### Example 3: Custom Output Directory
+
+Export to organized directory structure:
+
+```bash
+# Create exports directory
+mkdir exports
+
+# Export to specific location
+python main.py export -o exports/misp_full_export_2024-10-27.json --pretty
+```
+
+### Example 4: SIEM Integration Export
+
+Export for Splunk, ELK Stack, or other SIEM platforms:
+
+```bash
+# Compact JSON for faster ingestion
+python main.py export -o siem_import/misp_events.json
+
+# The JSON contains:
+# - All event attributes (IPs, ports, indicators)
+# - All objects (ip-port, annotation)
+# - All tags (TLP, MITRE ATT&CK, workflow states)
+# - All galaxies (threat actor, malware, techniques)
+# - Complete event metadata
+```
+
+**JSON Structure (per event):**
+```json
+{
+  "id": "1234",
+  "uuid": "5f4dcc3b-5aa7-65d3-b6d5-3bd4e8b9e8a1",
+  "info": "DDoS Attack on Web Infrastructure",
+  "date": "2024-10-26",
+  "threat_level_id": "2",
+  "analysis": "1",
+  "Attribute": [
+    {
+      "type": "ip-src",
+      "value": "192.168.1.100",
+      "category": "Network activity",
+      "to_ids": true
+    }
+  ],
+  "Object": [
+    {
+      "name": "ip-port",
+      "description": "Attacker IP and Port",
+      "Attribute": [...]
+    }
+  ],
+  "Tag": [
+    {"name": "tlp:green"},
+    {"name": "misp-event-type:incident"},
+    {"name": "information-security-indicators:incident-type=\"ddos\""}
+  ],
+  "Galaxy": [...]
+}
+```
+
+### Example 5: Scheduled Export for Backup
+
+Create a scheduled task for regular exports:
+
+**Windows Task Scheduler:**
+```powershell
+# Create backup script (backup_misp.ps1)
+cd C:\path\to\misp-ddos-cli
+.\venv\Scripts\Activate.ps1
+$date = Get-Date -Format "yyyy-MM-dd"
+python main.py export -o "backups\misp_backup_$date.json"
+```
+
+**Linux Cron Job:**
+```bash
+# Add to crontab (daily at 2 AM)
+0 2 * * * cd /path/to/misp-ddos-cli && source venv/bin/activate && python main.py export -o backups/misp_backup_$(date +\%Y-\%m-\%d).json
+```
+
+### Example 6: Export for Cross-Organization Sharing
+
+Export events for sharing with partner organizations:
+
+```bash
+# Export all events
+python main.py export -o shared/all_events.json --pretty
+
+# Review the JSON and filter by TLP if needed
+# Only share TLP:green or TLP:clear events with external parties
+```
+
+**Security Considerations:**
+- ⚠️ Review TLP levels before sharing
+- ⚠️ Filter out TLP:red and TLP:amber events for restricted sharing
+- ⚠️ Sanitize descriptions for sensitive information
+- ✅ This export includes ALL events visible to your API key
+
 ## CSV Template Guide
 
 ### Template Location
@@ -370,6 +524,41 @@ python main.py bulk threat_feed_ddos.csv --skip-invalid
 
 # 4. Review failed rows
 # 5. Fix and re-upload failures
+```
+
+### Workflow 5: SIEM Integration Pipeline
+
+```bash
+# 1. Export all MISP events to JSON
+python main.py export -o siem/misp_events.json
+
+# 2. Import JSON into SIEM platform
+# For Splunk:
+# - Upload to $SPLUNK_HOME/etc/apps/search/lookups/
+# - Create lookup definition
+# - Use in searches: | inputlookup misp_events.json
+
+# For ELK Stack:
+# - Use Logstash with json codec
+# - Index into Elasticsearch
+# - Visualize in Kibana
+
+# 3. Schedule regular exports (daily/weekly)
+# 4. Automate SIEM ingestion process
+```
+
+### Workflow 6: Cross-Organization Intelligence Sharing
+
+```bash
+# 1. Export events from your MISP instance
+python main.py export -o exports/org_events.json --pretty
+
+# 2. Filter for shareable TLP levels (green/clear)
+# Review JSON and remove TLP:red or TLP:amber events if needed
+
+# 3. Share JSON file with partner organizations
+# 4. Partners can import into their MISP instances or SIEM platforms
+# 5. Establish regular sharing cadence (weekly/monthly)
 ```
 
 ## Error Handling

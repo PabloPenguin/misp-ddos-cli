@@ -14,6 +14,7 @@ This tool enables SOC analysts to efficiently create DDoS events in MISP with pr
 ### Core Functionality
 - ✅ **Interactive Mode** - Guided prompts for manual event creation
 - ✅ **Bulk Upload** - Process multiple events from CSV files
+- ✅ **Export Events** - Export all MISP events to JSON for SIEM ingestion
 - ✅ **Playbook Compliance** - Automatic enforcement of MISP DDoS Playbook standards
 - ✅ **Rich UI** - Beautiful terminal interface with progress tracking
 - ✅ **Comprehensive Validation** - Input validation at all trust boundaries
@@ -277,6 +278,37 @@ python main.py bulk events.csv --skip-invalid
 python main.py bulk events.csv --no-continue-on-error
 ```
 
+### Export Events to JSON
+
+Export all MISP events for SIEM ingestion or sharing:
+
+```bash
+# Export to timestamped JSON file
+python main.py export
+
+# Export to specific file
+python main.py export -o misp_events.json
+
+# Export with pretty formatting (human-readable)
+python main.py export -o events.json --pretty
+
+# Export to custom directory
+python main.py export -o exports/full_export.json --pretty
+```
+
+**Features:**
+- Exports ALL events with complete details (attributes, objects, tags, galaxies)
+- SIEM-ready JSON format
+- Automatic timestamped filenames
+- Progress tracking and statistics
+- Compact or pretty-printed output
+
+**Use Cases:**
+- Import events into SIEM platforms (Splunk, ELK, QRadar, Sentinel)
+- Share intelligence with other organizations
+- Backup MISP event data
+- Offline analysis and reporting
+
 ### CSV Template
 
 Get information about the CSV format:
@@ -326,7 +358,16 @@ python main.py --version
 # Show help
 python main.py --help
 python main.py bulk --help
+python main.py export --help
 ```
+
+### Available Commands
+
+- `interactive` - Create events manually with guided prompts
+- `bulk` - Upload multiple events from CSV file
+- `export` - Export all MISP events to JSON format
+- `test-connection` - Verify MISP connectivity
+- `template` - Display CSV template information
 
 ## 🏗️ Project Structure
 

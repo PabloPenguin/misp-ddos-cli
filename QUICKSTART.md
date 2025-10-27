@@ -207,6 +207,22 @@ python main.py bulk your_events.csv --dry-run
 python main.py bulk your_events.csv
 ```
 
+### 5. Export Events to JSON
+
+```powershell
+# Export all events to JSON (for SIEM ingestion)
+python main.py export -o misp_events.json --pretty
+
+# Export with automatic timestamped filename
+python main.py export --pretty
+```
+
+**Use Cases:**
+- Import into SIEM platforms (Splunk, ELK Stack, QRadar, Sentinel)
+- Share intelligence with other organizations
+- Backup MISP event data
+- Offline analysis
+
 ## Sample CSV File
 
 Create `test_events.csv`:
@@ -228,8 +244,14 @@ python main.py bulk test_events.csv
 # Show version
 python main.py --version
 
+# Show all available commands
+python main.py --help
+
 # Enable debug logging
 python main.py --debug interactive
+
+# Export all events to JSON
+python main.py export -o misp_export.json --pretty
 
 # Bulk upload with skip invalid
 python main.py bulk events.csv --skip-invalid
