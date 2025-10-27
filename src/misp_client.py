@@ -292,8 +292,7 @@ class MISPClient:
         attacker_ports: Optional[List[int]] = None,
         description: str = "",
         tlp: str = "green",
-        workflow_state: str = "new",
-        attack_type: str = "direct-flood"
+        workflow_state: str = "new"
     ) -> Dict[str, Any]:
         """
         Create a DDoS event in MISP following the Streamlined DDoS Playbook.
@@ -308,7 +307,6 @@ class MISPClient:
             description: Detailed description of the attack
             tlp: Traffic Light Protocol level (clear, green, amber, red)
             workflow_state: Workflow state (always "new" for event creation)
-            attack_type: Attack type (direct-flood, amplification, or both)
         
         Returns:
             Dictionary containing the created event details
@@ -369,14 +367,6 @@ class MISPClient:
         
         # Workflow state is always "new" for event creation
         # Validation removed - workflow state set to "new" by default
-        
-        # Validate attack type
-        valid_attack_types = ["direct-flood", "amplification", "both"]
-        if attack_type not in valid_attack_types:
-            raise MISPValidationError(
-                f"Invalid attack type: {attack_type}. "
-                f"Must be one of {valid_attack_types}"
-            )
         
         try:
             # Create MISP event

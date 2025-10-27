@@ -38,7 +38,6 @@ class DDoSEventValidator:
     REQUIRED_FIELDS = [
         "date",
         "event_name",
-        "attack_type",
         "attacker_ips",
         "victim_ip",
         "victim_port",
@@ -51,7 +50,6 @@ class DDoSEventValidator:
     ]
     
     VALID_TLP_LEVELS = ["clear", "green", "amber", "red"]
-    VALID_ATTACK_TYPES = ["direct-flood", "amplification", "both"]
     
     # Maximum limits for security
     MAX_EVENT_NAME_LENGTH = 255
@@ -228,14 +226,6 @@ class DDoSEventValidator:
         # SOC analysts will update workflow state during peer review
         workflow_state = "new"
         
-        # Validate attack type
-        attack_type = row["attack_type"].strip().lower()
-        if attack_type not in self.VALID_ATTACK_TYPES:
-            errors.append(
-                f"Row {row_number}: Invalid attack type '{attack_type}'. "
-                f"Must be one of {self.VALID_ATTACK_TYPES}"
-            )
-        
         if errors:
             raise CSVValidationError("\n".join(errors))
         
@@ -249,8 +239,7 @@ class DDoSEventValidator:
             "attacker_ports": attacker_ports if attacker_ports else None,
             "description": description,
             "tlp": tlp if tlp else "green",
-            "workflow_state": workflow_state,
-            "attack_type": attack_type
+            "workflow_state": workflow_state
         }
 
 

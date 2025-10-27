@@ -157,21 +157,6 @@ This tool will guide you through creating a properly structured DDoS event with:
             "Description must be 1-5000 characters"
         )
         
-        # Attack type
-        self.console.print("\n[bold]⚔️  Attack Information[/bold]\n")
-        self.console.print("[dim]Attack types:[/dim]")
-        self.console.print("  1. [cyan]direct-flood[/cyan] - Direct flood attack (T1498.001)")
-        self.console.print("  2. [cyan]amplification[/cyan] - Amplification attack (T1498.002)")
-        self.console.print("  3. [cyan]both[/cyan] - Both types\n")
-        
-        attack_type_map = {"1": "direct-flood", "2": "amplification", "3": "both"}
-        attack_choice = self._prompt_with_validation(
-            "[cyan]Select attack type[/cyan] [dim](1-3)[/dim]",
-            lambda x: x in attack_type_map,
-            "Please enter 1, 2, or 3"
-        )
-        attack_type = attack_type_map[attack_choice]
-        
         # Victim information
         self.console.print("\n[bold]🎯 Victim Information[/bold]\n")
         
@@ -256,7 +241,6 @@ This tool will guide you through creating a properly structured DDoS event with:
             "event_name": event_name,
             "event_date": event_date,
             "description": description,
-            "attack_type": attack_type,
             "victim_ip": victim_ip,
             "victim_port": int(victim_port),
             "attacker_ips": attacker_ips,
@@ -280,7 +264,6 @@ This tool will guide you through creating a properly structured DDoS event with:
         
         table.add_row("Event Name", event_data["event_name"])
         table.add_row("Date", event_data["event_date"])
-        table.add_row("Attack Type", event_data["attack_type"])
         table.add_row("Victim IP", event_data["victim_ip"])
         table.add_row("Victim Port", str(event_data["victim_port"]))
         table.add_row("Attacker IPs", f"{len(event_data['attacker_ips'])} IP(s)")
