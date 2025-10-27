@@ -25,6 +25,7 @@ from src.misp_client import MISPClient, MISPClientError, MISPConnectionError
 from src.cli_interactive import InteractiveCLI
 from src.cli_bulk import BulkUploadCLI
 from src.csv_processor import CSVProcessor
+from src.auto_update import auto_update
 
 __version__ = "1.0.0"
 
@@ -103,6 +104,18 @@ def cli(ctx, env_file: Optional[str], debug: bool):
     """
     # Ensure context object exists
     ctx.ensure_object(dict)
+    
+    # Check for updates from GitHub (silently fails if no network)
+    try:
+        updated, update_message = auto_update(silent=True)
+        if updated:
+            console.print(f"[green]✓[/green] {update_message}")
+            console.print("[dim]Restart may be required for some updates[/dim]\n")
+        else:
+            logger.debug(f"Auto-update: {update_message}")
+    except Exception as e:
+        # Never fail on update check
+        logger.debug(f"Auto-update check failed: {e}")
     
     try:
         # Load configuration

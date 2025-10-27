@@ -47,15 +47,11 @@ class DDoSEventValidator:
     
     OPTIONAL_FIELDS = [
         "tlp",
-        "workflow_state",
-        "attacker_ports",
-        "confidence_level"
+        "attacker_ports"
     ]
     
     VALID_TLP_LEVELS = ["clear", "green", "amber", "red"]
-    VALID_WORKFLOW_STATES = ["new", "in-progress", "reviewed", "closed"]
     VALID_ATTACK_TYPES = ["direct-flood", "amplification", "both"]
-    VALID_CONFIDENCE_LEVELS = ["high", "medium", "low"]
     
     # Maximum limits for security
     MAX_EVENT_NAME_LENGTH = 255
@@ -228,13 +224,9 @@ class DDoSEventValidator:
                 f"Must be one of {self.VALID_TLP_LEVELS}"
             )
         
-        # Validate workflow state (optional, default to new)
-        workflow_state = row.get("workflow_state", "new").strip().lower()
-        if workflow_state and workflow_state not in self.VALID_WORKFLOW_STATES:
-            errors.append(
-                f"Row {row_number}: Invalid workflow state '{workflow_state}'. "
-                f"Must be one of {self.VALID_WORKFLOW_STATES}"
-            )
+        # Workflow state is always "new" - ignore CSV value if provided
+        # SOC analysts will update workflow state during peer review
+        workflow_state = "new"
         
         # Validate attack type
         attack_type = row["attack_type"].strip().lower()
@@ -242,14 +234,6 @@ class DDoSEventValidator:
             errors.append(
                 f"Row {row_number}: Invalid attack type '{attack_type}'. "
                 f"Must be one of {self.VALID_ATTACK_TYPES}"
-            )
-        
-        # Validate confidence level (optional, default to high)
-        confidence_level = row.get("confidence_level", "high").strip().lower()
-        if confidence_level and confidence_level not in self.VALID_CONFIDENCE_LEVELS:
-            errors.append(
-                f"Row {row_number}: Invalid confidence level '{confidence_level}'. "
-                f"Must be one of {self.VALID_CONFIDENCE_LEVELS}"
             )
         
         if errors:
@@ -265,9 +249,8 @@ class DDoSEventValidator:
             "attacker_ports": attacker_ports if attacker_ports else None,
             "description": description,
             "tlp": tlp if tlp else "green",
-            "workflow_state": workflow_state if workflow_state else "new",
-            "attack_type": attack_type,
-            "confidence_level": confidence_level if confidence_level else "high"
+            "workflow_state": workflow_state,
+            "attack_type": attack_type
         }
 
 
@@ -380,17 +363,20 @@ class CSVProcessor:
         try:
             # Stream CSV file line by line
             with open(filepath, 'r', encoding='utf-8', newline='') as csvfile:
-                # Detect CSV dialect
-                sample = csvfile.read(4096)
-                csvfile.seek(0)
+                # Skip comment lines (starting with #)
+                content_lines = []
+                for line in csvfile:
+                    stripped = line.strip()
+                    # Skip empty lines and comment lines
+                    if stripped and not stripped.startswith('#'):
+                        content_lines.append(line)
                 
-                try:
-                    dialect = csv.Sniffer().sniff(sample)
-                except csv.Error:
-                    # Use default dialect if detection fails
-                    dialect = csv.excel
+                # Create a string with just the content (no comments)
+                content = ''.join(content_lines)
                 
-                reader = csv.DictReader(csvfile, dialect=dialect)
+                # Create reader from clean content
+                from io import StringIO
+                reader = csv.DictReader(StringIO(content))
                 
                 # Validate header
                 if not reader.fieldnames:

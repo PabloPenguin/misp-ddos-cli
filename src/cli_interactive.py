@@ -119,7 +119,7 @@ This tool will guide you through creating a properly structured DDoS event with:
 • Mandatory global tags (TLP, incident type)
 • MITRE ATT&CK patterns
 • Structured objects (ip-port, annotation)
-• Proper confidence tagging
+• Automatic workflow state (new)
         """
         self.console.print(Panel(welcome_text, border_style="cyan"))
     
@@ -249,36 +249,8 @@ This tool will guide you through creating a properly structured DDoS event with:
         )
         tlp = tlp_map[tlp_choice]
         
-        # Workflow state
-        self.console.print("\n[dim]Workflow states:[/dim]")
-        self.console.print("  1. [cyan]new[/cyan] - New event (default)")
-        self.console.print("  2. [yellow]in-progress[/yellow] - Investigation ongoing")
-        self.console.print("  3. [blue]reviewed[/blue] - Reviewed by analyst")
-        self.console.print("  4. [green]closed[/green] - Investigation closed\n")
-        
-        workflow_map = {"1": "new", "2": "in-progress", "3": "reviewed", "4": "closed"}
-        workflow_choice = self._prompt_with_validation(
-            "[cyan]Select workflow state[/cyan] [dim](1-4)[/dim]",
-            lambda x: x in workflow_map,
-            "Please enter 1, 2, 3, or 4",
-            default="1"
-        )
-        workflow_state = workflow_map[workflow_choice]
-        
-        # Confidence level
-        self.console.print("\n[dim]Confidence levels:[/dim]")
-        self.console.print("  1. [green]high[/green] - High confidence (default)")
-        self.console.print("  2. [yellow]medium[/yellow] - Medium confidence")
-        self.console.print("  3. [red]low[/red] - Low confidence\n")
-        
-        confidence_map = {"1": "high", "2": "medium", "3": "low"}
-        confidence_choice = self._prompt_with_validation(
-            "[cyan]Select confidence level[/cyan] [dim](1-3)[/dim]",
-            lambda x: x in confidence_map,
-            "Please enter 1, 2, or 3",
-            default="1"
-        )
-        confidence_level = confidence_map[confidence_choice]
+        # Workflow state is always "new" - SOC analysts will update during peer review
+        workflow_state = "new"
         
         return {
             "event_name": event_name,
@@ -290,8 +262,7 @@ This tool will guide you through creating a properly structured DDoS event with:
             "attacker_ips": attacker_ips,
             "attacker_ports": attacker_ports if attacker_ports else None,
             "tlp": tlp,
-            "workflow_state": workflow_state,
-            "confidence_level": confidence_level
+            "workflow_state": workflow_state
         }
     
     def display_summary(self, event_data: dict) -> None:

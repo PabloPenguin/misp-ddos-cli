@@ -126,8 +126,6 @@ class MISPClient:
     }
     
     VALID_TLP_LEVELS = ["clear", "green", "amber", "red"]
-    VALID_WORKFLOW_STATES = ["new", "in-progress", "reviewed", "closed"]
-    VALID_CONFIDENCE_LEVELS = ["high", "medium", "low"]
     
     def __init__(
         self,
@@ -297,8 +295,7 @@ class MISPClient:
         description: str = "",
         tlp: str = "green",
         workflow_state: str = "new",
-        attack_type: str = "direct-flood",
-        confidence_level: str = "high"
+        attack_type: str = "direct-flood"
     ) -> Dict[str, Any]:
         """
         Create a DDoS event in MISP following the Streamlined DDoS Playbook.
@@ -312,9 +309,8 @@ class MISPClient:
             attacker_ports: Optional list of attacker ports
             description: Detailed description of the attack
             tlp: Traffic Light Protocol level (clear, green, amber, red)
-            workflow_state: Workflow state (new, in-progress, reviewed, closed)
+            workflow_state: Workflow state (always "new" for event creation)
             attack_type: Attack type (direct-flood, amplification, or both)
-            confidence_level: Confidence level (high, medium, low)
         
         Returns:
             Dictionary containing the created event details
@@ -373,21 +369,8 @@ class MISPClient:
                 f"Invalid TLP level: {tlp}. Must be one of {self.VALID_TLP_LEVELS}"
             )
         
-        # Validate workflow state
-        workflow_state_lower = workflow_state.lower()
-        if workflow_state_lower not in self.VALID_WORKFLOW_STATES:
-            raise MISPValidationError(
-                f"Invalid workflow state: {workflow_state}. "
-                f"Must be one of {self.VALID_WORKFLOW_STATES}"
-            )
-        
-        # Validate confidence level
-        confidence_lower = confidence_level.lower()
-        if confidence_lower not in self.VALID_CONFIDENCE_LEVELS:
-            raise MISPValidationError(
-                f"Invalid confidence level: {confidence_level}. "
-                f"Must be one of {self.VALID_CONFIDENCE_LEVELS}"
-            )
+        # Workflow state is always "new" for event creation
+        # Validation removed - workflow state set to "new" by default
         
         # Validate attack type
         valid_attack_types = ["direct-flood", "amplification", "both"]
@@ -420,8 +403,8 @@ class MISPClient:
                 event.add_tag(self.MITRE_ATTACK_PATTERNS["direct-flood"])
                 event.add_tag(self.MITRE_ATTACK_PATTERNS["amplification"])
             
-            # Add local workflow tag
-            event.add_tag(f"{self.LOCAL_WORKFLOW_TAG_PREFIX}{workflow_state_lower}")
+            # Add local workflow tag (always "new" for event creation)
+            event.add_tag(f"{self.LOCAL_WORKFLOW_TAG_PREFIX}new")
             
             # Create annotation object for description
             if description:
@@ -429,7 +412,7 @@ class MISPClient:
                 annotation.add_attribute("text", value=description)
                 event.add_object(annotation)
             
-            # Create ip-port objects for attackers
+            # Create ip-port objects for attackers (no confidence tagging)
             for idx, attacker_ip in enumerate(attacker_ips):
                 ip_port_obj = MISPObject("ip-port")
                 ip_port_obj.add_attribute("ip", value=attacker_ip)
@@ -439,11 +422,6 @@ class MISPClient:
                     port = attacker_ports[idx]
                     if self._validate_port(port):
                         ip_port_obj.add_attribute("dst-port", value=str(port))
-                
-                # Add confidence level tag to the IP attribute
-                for attr in ip_port_obj.attributes:
-                    if attr.type == "ip":
-                        attr.add_tag(f"confidence-level:{confidence_lower}")
                 
                 ip_port_obj.comment = f"Attacker IP {idx + 1}"
                 event.add_object(ip_port_obj)
