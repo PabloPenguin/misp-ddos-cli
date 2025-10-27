@@ -119,11 +119,9 @@ class MISPClient:
     
     LOCAL_WORKFLOW_TAG_PREFIX = "workflow:state="
     
-    MITRE_ATTACK_PATTERNS = {
-        "network-dos": "mitre-attack-pattern:T1498",
-        "direct-flood": "mitre-attack-pattern:T1498.001",
-        "amplification": "mitre-attack-pattern:T1498.002"
-    }
+    # MITRE ATT&CK T1498 - Network Denial of Service (DDoS-specific)
+    MITRE_ATTACK_PATTERN = "mitre-attack-pattern:T1498"
+    MITRE_GALAXY_CLUSTER = 'misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"'
     
     VALID_TLP_LEVELS = ["clear", "green", "amber", "red"]
     
@@ -391,22 +389,12 @@ class MISPClient:
             event.add_tag("information-security-indicators:incident-type=\"ddos\"")
             event.add_tag("misp-event-type:incident")
             
-            # Add MITRE ATT&CK pattern tags (always include base technique)
-            event.add_tag(self.MITRE_ATTACK_PATTERNS["network-dos"])
+            # Add MITRE ATT&CK T1498 tag (Network Denial of Service)
+            event.add_tag(self.MITRE_ATTACK_PATTERN)
             
-            # Add specific attack type pattern tags
-            if attack_type == "direct-flood":
-                event.add_tag(self.MITRE_ATTACK_PATTERNS["direct-flood"])
-            elif attack_type == "amplification":
-                event.add_tag(self.MITRE_ATTACK_PATTERNS["amplification"])
-            elif attack_type == "both":
-                event.add_tag(self.MITRE_ATTACK_PATTERNS["direct-flood"])
-                event.add_tag(self.MITRE_ATTACK_PATTERNS["amplification"])
-            
-            # Add MITRE ATT&CK Galaxy Cluster for T1498 (Network Denial of Service)
-            # Galaxy clusters in MISP are added as special tags
-            event.add_tag('misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"')
-            logger.debug("Added T1498 Network Denial of Service galaxy cluster")
+            # Add MITRE ATT&CK T1498 Galaxy Cluster (Network Denial of Service)
+            event.add_tag(self.MITRE_GALAXY_CLUSTER)
+            logger.debug("Added T1498 Network Denial of Service tag and galaxy cluster")
             
             # Add local workflow tag (always "new" for event creation)
             event.add_tag(f"{self.LOCAL_WORKFLOW_TAG_PREFIX}new")
