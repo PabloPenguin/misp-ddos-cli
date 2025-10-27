@@ -391,10 +391,10 @@ class MISPClient:
             event.add_tag("information-security-indicators:incident-type=\"ddos\"")
             event.add_tag("misp-event-type:incident")
             
-            # Add MITRE ATT&CK pattern (always include base technique)
+            # Add MITRE ATT&CK pattern tags (always include base technique)
             event.add_tag(self.MITRE_ATTACK_PATTERNS["network-dos"])
             
-            # Add specific attack type pattern
+            # Add specific attack type pattern tags
             if attack_type == "direct-flood":
                 event.add_tag(self.MITRE_ATTACK_PATTERNS["direct-flood"])
             elif attack_type == "amplification":
@@ -402,6 +402,11 @@ class MISPClient:
             elif attack_type == "both":
                 event.add_tag(self.MITRE_ATTACK_PATTERNS["direct-flood"])
                 event.add_tag(self.MITRE_ATTACK_PATTERNS["amplification"])
+            
+            # Add MITRE ATT&CK Galaxy Cluster for T1498 (Network Denial of Service)
+            # Galaxy clusters in MISP are added as special tags
+            event.add_tag('misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"')
+            logger.debug("Added T1498 Network Denial of Service galaxy cluster")
             
             # Add local workflow tag (always "new" for event creation)
             event.add_tag(f"{self.LOCAL_WORKFLOW_TAG_PREFIX}new")
