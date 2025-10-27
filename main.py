@@ -105,16 +105,24 @@ def cli(ctx, env_file: Optional[str], debug: bool):
     # Ensure context object exists
     ctx.ensure_object(dict)
     
-    # Check for updates from GitHub (silently fails if no network)
+    # Check for updates from GitHub every time the script runs
     try:
-        updated, update_message = auto_update(silent=True)
+        console.print("[cyan]Checking for updates from GitHub...[/cyan]")
+        updated, update_message = auto_update(silent=False)
         if updated:
-            console.print(f"[green]✓[/green] {update_message}")
-            console.print("[dim]Restart may be required for some updates[/dim]\n")
+            console.print(f"[green]SUCCESS: Updated successfully - {update_message}[/green]")
+            console.print("[yellow]WARNING: Please restart the script to use the latest version[/yellow]\n")
         else:
-            logger.debug(f"Auto-update: {update_message}")
+            # Show the status even if no update
+            if "Already up to date" in update_message:
+                console.print(f"[green]OK: {update_message}[/green]\n")
+            elif "Git not available" in update_message or "Not a git repository" in update_message:
+                console.print(f"[dim]INFO: Auto-update skipped - {update_message}[/dim]\n")
+            else:
+                console.print(f"[dim]INFO: {update_message}[/dim]\n")
     except Exception as e:
-        # Never fail on update check
+        # Never fail on update check, but inform the user
+        console.print(f"[yellow]WARNING: Could not check for updates - {str(e)}[/yellow]\n")
         logger.debug(f"Auto-update check failed: {e}")
     
     try:
