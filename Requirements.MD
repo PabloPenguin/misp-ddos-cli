@@ -604,8 +604,6 @@ Always include technique:
 mitre-attack-pattern:T1498 — Network DoS
 Optional if relevant: mitre-attack-pattern:T1498.001 — Direct Flood
 mitre-attack-pattern:T1498.002 — Amplification
-1. Attribute-Level Tagging (Global)
-Attacker IPs → confidence-level:high (simple, binary context)
 1. Objects (Preferred over Attribute events) (Structured Evidence)
 annotation → analyst description (always include).
 ip-port → attacker/victim IPs with port context.

@@ -289,8 +289,7 @@ This tool will guide you through creating a properly structured DDoS event with:
             table.add_row("Attacker Ports", f"{len(event_data['attacker_ports'])} port(s)")
         
         table.add_row("TLP Level", event_data["tlp"])
-        table.add_row("Workflow State", event_data["workflow_state"])
-        table.add_row("Confidence", event_data["confidence_level"])
+        table.add_row("Workflow State", "new")  # Always "new" - SOC analysts update during peer review
         table.add_row("Description", event_data["description"][:100] + "..." if len(event_data["description"]) > 100 else event_data["description"])
         
         self.console.print(table)
