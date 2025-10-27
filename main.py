@@ -78,29 +78,49 @@ def cli(ctx, env_file: Optional[str], debug: bool):
     """
     MISP DDoS CLI - Create and manage DDoS events in MISP.
     
-    This tool provides two modes of operation:
+    Automatically checks for updates from GitHub on every run to ensure
+    you're using the latest version.
     
     \b
-    1. Interactive mode: Guided prompts for manual event creation
-    2. Bulk mode: Process CSV files with multiple events
+    Available Commands:
+    
+    \b
+    • interactive    - Guided prompts for manual event creation
+    • bulk          - Process and upload CSV files with multiple events
+    • export        - Export all MISP events to JSON format (SIEM-ready)
+    • template      - Display CSV template information and field descriptions
+    • test-connection - Test your MISP connection and verify credentials
     
     Configuration is loaded from environment variables (.env file).
     See .env.example for required configuration.
     
-    Examples:
+    \b
+    Quick Start:
     
     \b
-        # Interactive mode
+        # Test your MISP connection first
+        python main.py test-connection
+        
+        # Create events interactively
         python main.py interactive
+        
+        # View CSV template info
+        python main.py template
         
         # Bulk upload from CSV
         python main.py bulk events.csv
+        
+        # Export events for SIEM
+        python main.py export --pretty
         
         # Validate CSV without uploading
         python main.py bulk events.csv --dry-run
         
         # Use custom .env file
         python main.py --env-file /path/to/.env interactive
+        
+        # Enable debug logging
+        python main.py --debug interactive
     """
     # Ensure context object exists
     ctx.ensure_object(dict)
