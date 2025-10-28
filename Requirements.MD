@@ -899,7 +899,7 @@ pytest-mock>=3.12.0      # Mocking utilities
 responses>=0.24.1        # HTTP response mocking
 ```
 
-**Install:** `pip install -r requirements-dev.txt`
+**Install:** Included in `requirements.txt` (no separate dev file needed)
 
 ### Removed Dependencies
 **pandas** and **numpy** were removed in commit `1c4687c` (Oct 27, 2025) because:
@@ -1074,7 +1074,7 @@ See `TROUBLESHOOTING.md` for comprehensive troubleshooting guide including:
 - Source files: 7 Python files
 - Test files: 1 comprehensive test suite (31 tests)
 - Documentation: 5 markdown files
-- Configuration: 3 files (requirements.txt, requirements-dev.txt, setup.ps1)
+- Configuration: 2 files (requirements.txt, setup.ps1)
 - Templates: 2 CSV files
 
 **Test Coverage:**

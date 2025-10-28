@@ -162,11 +162,9 @@ All dependencies are pure Python with pre-built wheels for Windows/Linux/macOS:
 
 **Total installation size:** ~50MB (vs ~250MB with pandas/numpy)
 
-### Development Dependencies (Optional)
-```bash
-pip install -r requirements-dev.txt
-```
+### Development/Testing Dependencies (Included)
 
+The following testing dependencies are included in `requirements.txt`:
 - **pytest** (>=7.4.3) - Testing framework
 - **pytest-cov** (>=4.1.0) - Coverage reporting
 - **pytest-mock** (>=3.12.0) - Mocking utilities

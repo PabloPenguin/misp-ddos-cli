@@ -154,10 +154,8 @@ pip list | Select-String "click|pymisp|rich"
 - pandas (no longer needed - using Python's built-in csv module)
 - numpy (no longer needed)
 
-**Development dependencies** (optional):
-```powershell
-pip install -r requirements-dev.txt
-```
+**Testing dependencies** (included in requirements.txt):
+- pytest, pytest-cov, pytest-mock, responses
 
 ---
 
