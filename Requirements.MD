@@ -593,30 +593,41 @@ The Tailscale address is server1.tailaa85d9.ts.net
 Phase 11: MISP Playbook to strictly adhere our outcome towards
 Below is the Shared MISP DDoS Playbook we must adhere to for structure and consistency: 
 
-🛡️ Streamlined MISP DDoS Playbook (Public Instance) 1. Mandatory Event Tags (Global)
-tlp:green (adjust if sensitive; only TLP needed for sharing control)
-information-security-indicators:incident-type="ddos"
-misp-event-type:incident
-1. Recommended Event Tags
-🔒 workflow:state="new" → in-progress → reviewed → closed (Local-only; for your internal process, not shared)
-1. Galaxy Clusters (Global Enrichment)
-Always include technique:
-mitre-attack-pattern:T1498 — Network DoS
-Optional if relevant: mitre-attack-pattern:T1498.001 — Direct Flood
-mitre-attack-pattern:T1498.002 — Amplification
-1. Objects (Preferred over Attribute events) (Structured Evidence)
-annotation → analyst description (always include).
-ip-port → attacker source IPs (ip-src) and optional destination IPs (ip-dst) with port context.
+🛡️ Streamlined MISP DDoS Playbook (Public Instance)
+
+## Automatic Event Tags (Applied by CLI)
+
+**User-Selected Tags:**
+- `tlp:{clear|green|amber|red}` - Traffic Light Protocol level (user chooses during event creation)
+
+**Automatic Tags (No User Input Required):**
+- `workflow:state="draft"` - Local-only tag for LLM review workflow (automatically set to "draft" for all new events)
+- MITRE ATT&CK Galaxy Cluster: `misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"` - DDoS-specific technique
+
+## Workflow State Management
+- All new events are automatically tagged with `workflow:state="draft"`
+- LLM agents will review events and update workflow state:
+  - `draft` → `complete` (validated by LLM)
+  - `draft` → `rejected` (invalid/duplicate)
+- No manual workflow state selection needed during event creation
+
+## Objects (Structured Evidence)
+- **annotation** → Analyst description (always included)
+- **ip-port** → Attacker source IPs (ip-src) with optional destination IPs (ip-dst) and port context
+
+## Example Event Structure
+```
 Global Event Tags:
-tlp:green
-information-security-indicators:incident-type="ddos"
-misp-event-type:incident
-mitre-attack-pattern:T1498.001
+- tlp:green (user selected)
+- misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498" (automatic)
+
 Local Event Tags:
-workflow:state=new
+- workflow:state="draft" (automatic)
+
 Objects:
-annotation → description of campaign.
-ip-port → attacker IPs, ports.
+- annotation → Description of DDoS campaign
+- ip-port → Attacker IPs (ip-src), optional destination IPs (ip-dst), optional ports
+```
 
 
 Part 12: MISP Implementations
@@ -657,11 +668,13 @@ A production-ready CLI tool with API access to MISP instance that enables:
 - Environment-based configuration (.env)
 
 **MISP Playbook Compliance:**
-- Automatic tag application (TLP, incident-type, MITRE ATT&CK)
+- Automatic tag application:
+  - TLP tag (user-selected: clear/green/amber/red)
+  - workflow:state="draft" (automatic for LLM review)
+  - MITRE ATT&CK Galaxy Cluster: T1498 Network Denial of Service (automatic)
 - Structured objects (ip-port, annotation)
-- Confidence-level tagging on attacker IPs
-- Workflow state tracking
-- Support for all attack types (direct-flood, amplification, both)
+- Attacker IPs as primary data (ip-src)
+- Optional destination IPs and ports
 
 ### Project Structure
 
@@ -847,11 +860,13 @@ These are created during development but excluded from version control:
 - SSL/TLS support (configurable)
 
 ✅ **MISP Playbook Compliance:**
-- Automatic tag application (TLP, incident-type, MITRE ATT&CK)
+- Automatic tag application:
+  - TLP (user-selected)
+  - workflow:state="draft" (automatic)
+  - MITRE ATT&CK Galaxy T1498 (automatic)
 - Structured objects (ip-port, annotation)
-- Confidence-level tagging
-- Workflow state tracking
-- All attack types supported
+- Attacker IPs as primary data (ip-src)
+- Optional destination IPs and ports
 
 ✅ **Code Quality:**
 - ~2,800 lines of production Python
