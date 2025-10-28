@@ -157,23 +157,46 @@ This tool will guide you through creating a properly structured DDoS event with:
             "Annotation text must be 1-5000 characters"
         )
         
-        # Destination IP information
-        self.console.print("\n[bold]🎯 Destination IP Information[/bold]\n")
-        self.console.print("[dim]Enter destination IPs being targeted (you'll be prompted for multiple)[/dim]\n")
+        # Attacker IP information
+        self.console.print("\n[bold]🎯 Attacker IP Information[/bold]\n")
+        self.console.print("[dim]Enter attacker/source IPs launching the attack (you'll be prompted for multiple)[/dim]\n")
         
-        destination_ips = []
+        attacker_ips = []
         while True:
             ip = self._prompt_with_validation(
-                f"[cyan]Destination IP #{len(destination_ips) + 1}[/cyan] [dim](press Enter when done)[/dim]",
+                f"[cyan]Attacker IP #{len(attacker_ips) + 1}[/cyan] [dim](press Enter when done)[/dim]",
                 lambda x: not x or self._validate_ip(x),
                 "Invalid IP address format",
                 allow_empty=True
             )
             
             if not ip:
-                if len(destination_ips) == 0:
-                    self.console.print("[yellow]⚠️  At least one destination IP is required[/yellow]")
+                if len(attacker_ips) == 0:
+                    self.console.print("[yellow]⚠️  At least one attacker IP is required[/yellow]")
                     continue
+                break
+            
+            attacker_ips.append(ip)
+            self.console.print(f"[green]✓ Added {ip}[/green]")
+            
+            if len(attacker_ips) >= 1000:
+                self.console.print("[yellow]⚠️  Maximum 1000 IPs reached[/yellow]")
+                break
+        
+        # Destination IPs are optional (external orgs aren't concerned about your targets)
+        self.console.print("\n[bold]🎯 Destination IP Information (Optional)[/bold]\n")
+        self.console.print("[dim]Enter destination IPs being targeted if you want to track them (press Enter to skip)[/dim]\n")
+        
+        destination_ips = []
+        while True:
+            ip = self._prompt_with_validation(
+                f"[cyan]Destination IP #{len(destination_ips) + 1}[/cyan] [dim](press Enter to skip/finish)[/dim]",
+                lambda x: not x or self._validate_ip(x),
+                "Invalid IP address format",
+                allow_empty=True
+            )
+            
+            if not ip:
                 break
             
             destination_ips.append(ip)
@@ -210,7 +233,8 @@ This tool will guide you through creating a properly structured DDoS event with:
             "event_name": event_name,
             "event_date": event_date,
             "annotation_text": annotation_text,
-            "destination_ips": destination_ips,
+            "attacker_ips": attacker_ips,
+            "destination_ips": destination_ips if destination_ips else None,
             "destination_ports": destination_ports if destination_ports else None,
             "tlp": tlp,
             "workflow_state": workflow_state
@@ -231,7 +255,9 @@ This tool will guide you through creating a properly structured DDoS event with:
         
         table.add_row("Event Name", event_data["event_name"])
         table.add_row("Date", event_data["event_date"])
-        table.add_row("Destination IPs", f"{len(event_data['destination_ips'])} IP(s)")
+        table.add_row("Attacker IPs", f"{len(event_data['attacker_ips'])} IP(s)")
+        if event_data.get('destination_ips'):
+            table.add_row("Destination IPs", f"{len(event_data['destination_ips'])} IP(s)")
         table.add_row("TLP Level", event_data["tlp"])
         table.add_row("Workflow State", "new")  # Always "new" - SOC analysts update during peer review
         table.add_row("Annotation", event_data["annotation_text"][:100] + "..." if len(event_data["annotation_text"]) > 100 else event_data["annotation_text"])

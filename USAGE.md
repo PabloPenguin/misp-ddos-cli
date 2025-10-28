@@ -142,10 +142,10 @@ python main.py bulk events.csv
 
 **Sample CSV (events.csv):**
 ```csv
-date,event_name,tlp,destination_ips,destination_ports,annotation_text
-2024-10-26,Retail DDoS Wave 1,green,203.0.113.10;203.0.113.11,443;80,First wave of retail sector attacks targeting e-commerce infrastructure
-2024-10-26,Retail DDoS Wave 2,green,203.0.113.12;203.0.113.13,,Second wave targeting checkout systems with sustained traffic
-2024-10-27,DNS Amplification,green,203.0.113.20,53,DNS amplification attack exploiting open resolvers
+date,event_name,tlp,attacker_ips,destination_ips,destination_ports,annotation_text
+2024-10-26,Retail DDoS Wave 1,green,203.0.113.10;203.0.113.11,,,First wave of retail sector attacks from botnet infrastructure
+2024-10-26,Retail DDoS Wave 2,green,198.51.100.20;198.51.100.21,,,Second wave from different botnet with sustained traffic
+2024-10-27,DNS Amplification,green,203.0.113.30,,,DNS amplification attack exploiting open resolvers
 ```
 
 **Output:**

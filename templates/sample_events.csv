@@ -9,12 +9,12 @@
 #
 # NOTE: These are example events with fictional data for testing purposes
 
-date,event_name,tlp,destination_ips,destination_ports,annotation_text
-2024-10-26,Web Server Volumetric Attack,green,198.51.100.50;198.51.100.51;198.51.100.52,,Large-scale HTTP flood targeting e-commerce platform during peak hours. Approx 100Gbps traffic sustained for 2 hours. Mitigated with upstream provider assistance.
-2024-10-26,DNS Amplification Campaign,green,198.51.100.53;198.51.100.54,,DNS amplification attack using misconfigured open resolvers. Amplification factor estimated at 50x. Attack vectors identified and blocked.
-2024-10-26,Multi-Vector DDoS Attack,green,198.51.100.55;198.51.100.56;198.51.100.57;198.51.100.58,,Coordinated attack combining volumetric floods and application-layer attacks. Investigation ongoing. Multiple attack patterns detected.
-2024-10-25,NTP Amplification,green,198.51.100.59,,NTP amplification attack exploiting monlist command. Attack mitigated by upstream provider. Reflectors have been reported.
-2024-10-25,SYN Flood Attack,green,198.51.100.60;198.51.100.61,,Classic SYN flood targeting HTTPS service. Mitigated with SYN cookies. Case closed. Attack lasted approximately 45 minutes.
-2024-10-24,Memcached Amplification,amber,198.51.100.62,,Memcached amplification with extremely high amplification factor (50000x). Limited sharing due to ongoing investigation. Law enforcement notified.
-2024-10-24,SSDP Reflection Attack,green,198.51.100.63;198.51.100.64;198.51.100.65,,SSDP reflection attack using vulnerable IoT devices. Botnet of approximately 10000 devices. Attack vectors being investigated.
-2024-10-23,Gaming Server DDoS,green,198.51.100.66;198.51.100.67,,UDP flood targeting gaming infrastructure. Attack lasted 30 minutes. Service restored. Player base affected during prime hours.
+date,event_name,tlp,attacker_ips,destination_ips,destination_ports,annotation_text
+2024-10-26,Web Server Volumetric Attack,green,203.0.113.50;203.0.113.51;203.0.113.52,,,Large-scale HTTP flood from botnet. Approx 100Gbps traffic sustained for 2 hours. Mitigated with upstream provider assistance.
+2024-10-26,DNS Amplification Campaign,green,198.51.100.10;198.51.100.11;198.51.100.12,,,DNS amplification attack using misconfigured open resolvers. Amplification factor estimated at 50x. Attack vectors identified and blocked.
+2024-10-26,Multi-Vector DDoS Attack,green,203.0.113.20;203.0.113.21;203.0.113.22;203.0.113.23,,,Coordinated attack combining volumetric floods and application-layer attacks. Investigation ongoing. Multiple attack patterns detected.
+2024-10-25,NTP Amplification,green,198.51.100.30;198.51.100.31,,,NTP amplification attack exploiting monlist command. Attack mitigated by upstream provider. Reflectors have been reported.
+2024-10-25,SYN Flood Attack,green,203.0.113.40;203.0.113.41,,,Classic SYN flood from botnet infrastructure. Mitigated with SYN cookies. Case closed. Attack lasted approximately 45 minutes.
+2024-10-24,Memcached Amplification,amber,198.51.100.50,,,Memcached amplification with extremely high amplification factor (50000x). Limited sharing due to ongoing investigation. Law enforcement notified.
+2024-10-24,SSDP Reflection Attack,green,203.0.113.60;203.0.113.61;203.0.113.62,,,SSDP reflection attack using vulnerable IoT devices. Botnet of approximately 10000 devices. Attack vectors being investigated.
+2024-10-23,Gaming Server DDoS,green,198.51.100.70;198.51.100.71,,,UDP flood from gaming-focused botnet. Attack lasted 30 minutes. Service restored. Player base affected during prime hours.

@@ -286,7 +286,8 @@ class MISPClient:
         self,
         event_name: str,
         event_date: str,
-        destination_ips: List[str],
+        attacker_ips: List[str],
+        destination_ips: Optional[List[str]] = None,
         destination_ports: Optional[List[int]] = None,
         annotation_text: str = "",
         tlp: str = "green",
@@ -298,7 +299,8 @@ class MISPClient:
         Args:
             event_name: Name/title of the DDoS event
             event_date: Date of the event (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
-            destination_ips: List of destination IP addresses being targeted
+            attacker_ips: List of attacker/source IP addresses launching the attack
+            destination_ips: Optional list of destination IP addresses being targeted
             destination_ports: Optional list of destination ports
             annotation_text: Annotation text with detailed information about the attack
             tlp: Traffic Light Protocol level (clear, green, amber, red)
@@ -316,8 +318,8 @@ class MISPClient:
             >>> event = client.create_ddos_event(
             ...     event_name="DDoS Attack on Web Server",
             ...     event_date="2024-01-15",
-            ...     destination_ips=["192.168.1.100", "192.168.1.101"],
-            ...     annotation_text="Large-scale DDoS attack targeting infrastructure"
+            ...     attacker_ips=["203.0.113.10", "203.0.113.11"],
+            ...     annotation_text="Large-scale DDoS attack from botnet"
             ... )
         """
         start_time = time.time()
@@ -326,7 +328,7 @@ class MISPClient:
             extra={
                 "event_name": event_name,
                 "event_date": event_date,
-                "destination_count": len(destination_ips)
+                "attacker_count": len(attacker_ips)
             }
         )
         
@@ -337,13 +339,21 @@ class MISPClient:
         if not isinstance(event_date, str) or not event_date.strip():
             raise MISPValidationError("Event date must be a non-empty string")
         
-        if not isinstance(destination_ips, list) or not destination_ips:
-            raise MISPValidationError("Destination IPs must be a non-empty list")
+        if not isinstance(attacker_ips, list) or not attacker_ips:
+            raise MISPValidationError("Attacker IPs must be a non-empty list")
         
-        # Validate all destination IPs
-        for ip in destination_ips:
+        # Validate all attacker IPs
+        for ip in attacker_ips:
             if not isinstance(ip, str) or not self._validate_ip_address(ip):
-                raise MISPValidationError(f"Invalid destination IP address: {ip}")
+                raise MISPValidationError(f"Invalid attacker IP address: {ip}")
+        
+        # Validate destination IPs if provided
+        if destination_ips:
+            if not isinstance(destination_ips, list):
+                raise MISPValidationError("Destination IPs must be a list")
+            for ip in destination_ips:
+                if not isinstance(ip, str) or not self._validate_ip_address(ip):
+                    raise MISPValidationError(f"Invalid destination IP address: {ip}")
         
         # Validate TLP level
         tlp_lower = tlp.lower()
@@ -382,20 +392,25 @@ class MISPClient:
                 annotation.add_attribute("text", value=annotation_text)
                 event.add_object(annotation)
             
-            # Create ONE big ip-port object with all destination IPs
+            # Create ONE big ip-port object with all attacker IPs
             ip_port_obj = MISPObject("ip-port")
             
-            # Add all destination IPs as ip-dst attributes
-            for idx, dest_ip in enumerate(destination_ips):
-                ip_port_obj.add_attribute("ip-dst", value=dest_ip)
-                
-                # Add port if available for this IP
-                if destination_ports and idx < len(destination_ports):
-                    port = destination_ports[idx]
-                    if self._validate_port(port):
-                        ip_port_obj.add_attribute("dst-port", value=str(port))
+            # Add all attacker IPs as ip-src attributes
+            for attacker_ip in attacker_ips:
+                ip_port_obj.add_attribute("ip-src", value=attacker_ip)
             
-            ip_port_obj.comment = "Destination IPs and Ports"
+            # Add destination IPs if provided
+            if destination_ips:
+                for idx, dest_ip in enumerate(destination_ips):
+                    ip_port_obj.add_attribute("ip-dst", value=dest_ip)
+                    
+                    # Add port if available for this IP
+                    if destination_ports and idx < len(destination_ports):
+                        port = destination_ports[idx]
+                        if self._validate_port(port):
+                            ip_port_obj.add_attribute("dst-port", value=str(port))
+            
+            ip_port_obj.comment = "Attacker IPs" + (" and Destination IPs/Ports" if destination_ips else "")
             event.add_object(ip_port_obj)
             
             # Add event to MISP

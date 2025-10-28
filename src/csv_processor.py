@@ -38,12 +38,13 @@ class DDoSEventValidator:
     REQUIRED_FIELDS = [
         "date",
         "event_name",
-        "destination_ips",
+        "attacker_ips",
         "annotation_text"
     ]
     
     OPTIONAL_FIELDS = [
         "tlp",
+        "destination_ips",
         "destination_ports"
     ]
     
@@ -169,20 +170,35 @@ class DDoSEventValidator:
                 f"Row {row_number}: Invalid date format. Use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS"
             )
         
-        # Parse and validate destination IPs
-        destination_ips_str = row["destination_ips"].strip()
-        destination_ips = [ip.strip() for ip in destination_ips_str.split(";") if ip.strip()]
+        # Parse and validate attacker IPs
+        attacker_ips_str = row["attacker_ips"].strip()
+        attacker_ips = [ip.strip() for ip in attacker_ips_str.split(";") if ip.strip()]
         
-        if not destination_ips:
-            errors.append(f"Row {row_number}: No destination IPs provided")
-        elif len(destination_ips) > self.MAX_ATTACKER_IPS:
+        if not attacker_ips:
+            errors.append(f"Row {row_number}: No attacker IPs provided")
+        elif len(attacker_ips) > self.MAX_ATTACKER_IPS:
             errors.append(
-                f"Row {row_number}: Too many destination IPs (max {self.MAX_ATTACKER_IPS})"
+                f"Row {row_number}: Too many attacker IPs (max {self.MAX_ATTACKER_IPS})"
             )
         
-        for ip in destination_ips:
+        for ip in attacker_ips:
             if not self._validate_ip_address(ip):
-                errors.append(f"Row {row_number}: Invalid destination IP address '{ip}'")
+                errors.append(f"Row {row_number}: Invalid attacker IP address '{ip}'")
+        
+        # Parse and validate destination IPs (optional)
+        destination_ips = []
+        if "destination_ips" in row and row["destination_ips"].strip():
+            destination_ips_str = row["destination_ips"].strip()
+            destination_ips = [ip.strip() for ip in destination_ips_str.split(";") if ip.strip()]
+            
+            if len(destination_ips) > self.MAX_ATTACKER_IPS:
+                errors.append(
+                    f"Row {row_number}: Too many destination IPs (max {self.MAX_ATTACKER_IPS})"
+                )
+            
+            for ip in destination_ips:
+                if not self._validate_ip_address(ip):
+                    errors.append(f"Row {row_number}: Invalid destination IP address '{ip}'")
         
         # Parse and validate destination ports (optional)
         destination_ports = []
@@ -219,7 +235,8 @@ class DDoSEventValidator:
         return {
             "event_name": event_name,
             "event_date": date_str,
-            "destination_ips": destination_ips,
+            "attacker_ips": attacker_ips,
+            "destination_ips": destination_ips if destination_ips else None,
             "destination_ports": destination_ports if destination_ports else None,
             "annotation_text": annotation_text,
             "tlp": tlp if tlp else "green",

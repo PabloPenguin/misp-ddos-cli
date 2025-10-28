@@ -322,18 +322,19 @@ Use the template at `templates/ddos_event_template.csv`:
 **Required Columns:**
 - `date` - Event date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
 - `event_name` - Event title/name
-- `destination_ips` - Semicolon-separated destination IPs being targeted
+- `attacker_ips` - Semicolon-separated attacker/source IPs launching the attack
 - `annotation_text` - Detailed annotation text about the attack
 
 **Optional Columns:**
 - `tlp` - TLP level: `clear`, `green`, `amber`, `red` (default: green)
+- `destination_ips` - Semicolon-separated destination IPs being targeted
 - `destination_ports` - Semicolon-separated destination ports
 
 **Example CSV:**
 ```csv
-date,event_name,tlp,destination_ips,destination_ports,annotation_text
-2024-01-15,DDoS Campaign Against Finance,green,10.0.0.50;10.0.0.51,443;80,Large-scale DDoS attack targeting financial infrastructure with sustained volumetric traffic
-2024-01-16,Amplification Attack,green,10.0.0.52,80,DNS amplification attack exploiting open resolvers with high amplification factor
+date,event_name,tlp,attacker_ips,destination_ips,destination_ports,annotation_text
+2024-01-15,DDoS Botnet Campaign,green,203.0.113.10;203.0.113.11,,,Large-scale DDoS attack from botnet infrastructure with sustained volumetric traffic
+2024-01-16,DNS Amplification Attack,green,198.51.100.20,,,DNS amplification attack exploiting open resolvers with high amplification factor
 ```
 
 ### Advanced Options

@@ -225,9 +225,9 @@ python main.py export --pretty
 Create `test_events.csv`:
 
 ```csv
-date,event_name,tlp,destination_ips,destination_ports,annotation_text
-2024-10-26,Test Event 1,green,10.0.0.1;10.0.0.2,443;80,Test DDoS attack targeting infrastructure with volumetric traffic
-2024-10-26,Test Event 2,green,10.0.0.3,53,DNS amplification test using open resolvers
+date,event_name,tlp,attacker_ips,destination_ips,destination_ports,annotation_text
+2024-10-26,Test Botnet Attack,green,203.0.113.10;203.0.113.11,,,Test DDoS attack from botnet with volumetric traffic
+2024-10-26,Test Amplification,green,198.51.100.20,,,DNS amplification test using open resolvers
 ```
 
 Then upload:

@@ -365,18 +365,19 @@ def template():
     console.print("[bold]Required Fields:[/bold]")
     console.print("  • [cyan]date[/cyan] - Event date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)")
     console.print("  • [cyan]event_name[/cyan] - Event title/name")
-    console.print("  • [cyan]destination_ips[/cyan] - Destination IPs being targeted (semicolon-separated)")
+    console.print("  • [cyan]attacker_ips[/cyan] - Attacker/source IPs launching the attack (semicolon-separated)")
     console.print("  • [cyan]annotation_text[/cyan] - Detailed annotation text about the attack\n")
     
     console.print("[bold]Optional Fields:[/bold]")
     console.print("  • [cyan]tlp[/cyan] - TLP level (clear, green, amber, red) [default: green]")
+    console.print("  • [cyan]destination_ips[/cyan] - Destination IPs being targeted (semicolon-separated)")
     console.print("  • [cyan]destination_ports[/cyan] - Destination ports (semicolon-separated)\n")
     
     console.print("[bold]Example Row:[/bold]")
     console.print(
-        "[dim]2025-10-28,DDoS Attack on Web Server,green,"
-        "10.0.0.50;10.0.0.51,443;80,"
-        "Large-scale DDoS attack targeting infrastructure[/dim]\n"
+        "[dim]2025-10-28,DDoS Botnet Attack,green,"
+        "203.0.113.10;203.0.113.11,,,"
+        "Large-scale DDoS attack from known botnet infrastructure[/dim]\n"
     )
 
 
