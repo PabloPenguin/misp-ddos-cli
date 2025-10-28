@@ -323,14 +323,20 @@ python main.py export -o siem_import/misp_events.json
       "name": "ip-port",
       "description": "Attacker IP and Port",
       "Attribute": [...]
+    },
+    {
+      "name": "annotation",
+      "description": "Event annotation",
+      "Attribute": [...]
     }
   ],
   "Tag": [
     {"name": "tlp:green"},
-    {"name": "misp-event-type:incident"},
-    {"name": "information-security-indicators:incident-type=\"ddos\""}
+    {"name": "workflow:state=\"draft\""}
   ],
-  "Galaxy": [...]
+  "Galaxy": [
+    {"name": "misp-galaxy:mitre-attack-pattern=\"Network Denial of Service - T1498\""}
+  ]
 }
 ```
 
@@ -393,14 +399,6 @@ templates/ddos_event_template.csv
 - Example: `DDoS Attack on Financial Services`
 - Description: Descriptive name for the event
 
-**attack_type**
-- Format: `direct-flood`, `amplification`, or `both`
-- Example: `direct-flood`
-- Description: Type of DDoS attack
-  - `direct-flood`: Direct volumetric attack (T1498.001)
-  - `amplification`: Reflection/amplification (T1498.002)
-  - `both`: Both attack types
-
 **attacker_ips** (REQUIRED)
 - Format: Semicolon-separated IP addresses
 - Example: `203.0.113.10;203.0.113.11;198.51.100.20`
@@ -433,21 +431,14 @@ templates/ddos_event_template.csv
 - Example: `green`
 - Description: Traffic Light Protocol sharing level
 
-**workflow_state**
-- Format: `new`, `in-progress`, `reviewed`, or `closed`
-- Default: `new`
-- Example: `new`
-- Description: Investigation workflow state
+**Note on Workflow State**: All events are automatically tagged with `workflow:state="draft"` for LLM review. An automated LLM agent will review events and update the state to "complete" or "rejected". Manual workflow state selection is not available.
 
 **attacker_ports**
 - Format: Semicolon-separated ports
 - Example: `80;443;8080`
 - Description: Source ports used by attackers (optional)
 
-**confidence_level**
-- Format: `high`, `medium`, or `low`
-- Default: `high`
-- Example: `high`
+**Note on MITRE ATT&CK**: All events are automatically tagged with the MITRE ATT&CK Galaxy cluster `misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"`. No manual attack type selection is needed.
 - Description: Confidence in attribution
 
 ### CSV Best Practices
@@ -485,8 +476,7 @@ python main.py interactive
 # - Event name: Active DDoS - [Target Name]
 # - Date: Use default (today)
 # - Add known attacker IPs
-# - Set workflow_state to "in-progress"
-# - Upload immediately
+# - Upload immediately (workflow state automatically set to "draft")
 ```
 
 ### Workflow 3: Weekly Intelligence Sharing

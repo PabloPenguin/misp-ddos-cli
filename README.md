@@ -29,12 +29,14 @@ This tool enables SOC analysts to efficiently create DDoS events in MISP with pr
 - 🔒 **Secret Management** - Environment variable-based configuration
 
 ### MISP DDoS Playbook Compliance
-Automatically applies:
-- **Global Tags**: `tlp:green`, `information-security-indicators:incident-type="ddos"`, `misp-event-type:incident`
-- **MITRE ATT&CK**: `T1498` (Network DoS), `T1498.001` (Direct Flood), `T1498.002` (Amplification)
-- **Local Tags**: `workflow:state=new|in-progress|reviewed|closed`
+Automatically applies standardized tags and structure:
+- **TLP Tag** (user-selected): `tlp:clear`, `tlp:green`, `tlp:amber`, or `tlp:red`
+- **Workflow Tag** (automatic): `workflow:state="draft"` - All events start as drafts for LLM review
+- **MITRE ATT&CK Galaxy** (automatic): `misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"`
 - **Structured Objects**: `ip-port` object with `ip-src` attributes for attackers and optional `ip-dst` for destinations, `annotation` for detailed information
 - **Streamlined Data**: Focus on attacker IPs (threat intelligence sharing), with optional destination IPs and annotation objects for context
+
+**Note**: The workflow state is automatically set to "draft" for all new events. An LLM agent will review events and update the state to "complete" or "rejected" as part of the automated review workflow.
 
 ## 📋 Requirements
 
