@@ -9,11 +9,12 @@
 # 5. Workflow state is automatically set to "new" for all events
 # 6. All events are tagged with MITRE ATT&CK T1498 (Network Denial of Service)
 # 7. Date format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS
+# 8. destination_ports is optional and typically left empty
 #
 # EXAMPLE ROW (remove this line before uploading):
-# 2024-01-15,DDoS Campaign Against Finance Sector,green,192.168.1.100;192.168.1.101,80;443,10.0.0.50,443,Large-scale DDoS attack targeting online banking
+# 2024-01-15,DDoS Campaign Against Finance Sector,green,192.168.1.100;192.168.1.101,,Large-scale DDoS attack targeting online banking infrastructure
 #
 # CSV COLUMNS:
-# date*,event_name*,tlp,attacker_ips*,attacker_ports,victim_ip*,victim_port*,description*
+# date*,event_name*,tlp,destination_ips*,destination_ports,annotation_text*
 
-date,event_name,tlp,attacker_ips,attacker_ports,victim_ip,victim_port,description
+date,event_name,tlp,destination_ips,destination_ports,annotation_text

@@ -365,23 +365,18 @@ def template():
     console.print("[bold]Required Fields:[/bold]")
     console.print("  • [cyan]date[/cyan] - Event date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)")
     console.print("  • [cyan]event_name[/cyan] - Event title/name")
-    console.print("  • [cyan]attack_type[/cyan] - Attack type (direct-flood, amplification, both)")
-    console.print("  • [cyan]attacker_ips[/cyan] - Attacker IPs (semicolon-separated)")
-    console.print("  • [cyan]victim_ip[/cyan] - Victim IP address")
-    console.print("  • [cyan]victim_port[/cyan] - Victim port number")
-    console.print("  • [cyan]description[/cyan] - Detailed attack description\n")
+    console.print("  • [cyan]destination_ips[/cyan] - Destination IPs being targeted (semicolon-separated)")
+    console.print("  • [cyan]annotation_text[/cyan] - Detailed annotation text about the attack\n")
     
     console.print("[bold]Optional Fields:[/bold]")
     console.print("  • [cyan]tlp[/cyan] - TLP level (clear, green, amber, red) [default: green]")
-    console.print("  • [cyan]workflow_state[/cyan] - Workflow state (new, in-progress, reviewed, closed) [default: new]")
-    console.print("  • [cyan]attacker_ports[/cyan] - Attacker ports (semicolon-separated)")
-    console.print("  • [cyan]confidence_level[/cyan] - Confidence (high, medium, low) [default: high]\n")
+    console.print("  • [cyan]destination_ports[/cyan] - Destination ports (semicolon-separated)\n")
     
     console.print("[bold]Example Row:[/bold]")
     console.print(
-        "[dim]2024-01-15,DDoS Attack on Web Server,green,new,direct-flood,"
-        "192.168.1.100;192.168.1.101,80;443,10.0.0.50,443,"
-        "Large-scale DDoS attack,high[/dim]\n"
+        "[dim]2025-10-28,DDoS Attack on Web Server,green,"
+        "10.0.0.50;10.0.0.51,443;80,"
+        "Large-scale DDoS attack targeting infrastructure[/dim]\n"
     )
 
 

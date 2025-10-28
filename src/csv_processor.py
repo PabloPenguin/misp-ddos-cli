@@ -38,15 +38,13 @@ class DDoSEventValidator:
     REQUIRED_FIELDS = [
         "date",
         "event_name",
-        "attacker_ips",
-        "victim_ip",
-        "victim_port",
-        "description"
+        "destination_ips",
+        "annotation_text"
     ]
     
     OPTIONAL_FIELDS = [
         "tlp",
-        "attacker_ports"
+        "destination_ports"
     ]
     
     VALID_TLP_LEVELS = ["clear", "green", "amber", "red"]
@@ -54,7 +52,7 @@ class DDoSEventValidator:
     # Maximum limits for security
     MAX_EVENT_NAME_LENGTH = 255
     MAX_DESCRIPTION_LENGTH = 5000
-    MAX_ATTACKER_IPS = 1000  # Prevent DoS via large uploads
+    MAX_ATTACKER_IPS = 1000  # Prevent DoS via large uploads (applies to destination IPs)
     MAX_FILE_SIZE_MB = 10
     
     def __init__(self):
@@ -157,11 +155,11 @@ class DDoSEventValidator:
                 f"Row {row_number}: Event name exceeds {self.MAX_EVENT_NAME_LENGTH} characters"
             )
         
-        # Validate description length
-        description = row["description"].strip()
-        if len(description) > self.MAX_DESCRIPTION_LENGTH:
+        # Validate annotation text length
+        annotation_text = row["annotation_text"].strip()
+        if len(annotation_text) > self.MAX_DESCRIPTION_LENGTH:
             errors.append(
-                f"Row {row_number}: Description exceeds {self.MAX_DESCRIPTION_LENGTH} characters"
+                f"Row {row_number}: Annotation text exceeds {self.MAX_DESCRIPTION_LENGTH} characters"
             )
         
         # Validate date
@@ -171,48 +169,36 @@ class DDoSEventValidator:
                 f"Row {row_number}: Invalid date format. Use YYYY-MM-DD or YYYY-MM-DD HH:MM:SS"
             )
         
-        # Parse and validate attacker IPs
-        attacker_ips_str = row["attacker_ips"].strip()
-        attacker_ips = [ip.strip() for ip in attacker_ips_str.split(";") if ip.strip()]
+        # Parse and validate destination IPs
+        destination_ips_str = row["destination_ips"].strip()
+        destination_ips = [ip.strip() for ip in destination_ips_str.split(";") if ip.strip()]
         
-        if not attacker_ips:
-            errors.append(f"Row {row_number}: No attacker IPs provided")
-        elif len(attacker_ips) > self.MAX_ATTACKER_IPS:
+        if not destination_ips:
+            errors.append(f"Row {row_number}: No destination IPs provided")
+        elif len(destination_ips) > self.MAX_ATTACKER_IPS:
             errors.append(
-                f"Row {row_number}: Too many attacker IPs (max {self.MAX_ATTACKER_IPS})"
+                f"Row {row_number}: Too many destination IPs (max {self.MAX_ATTACKER_IPS})"
             )
         
-        for ip in attacker_ips:
+        for ip in destination_ips:
             if not self._validate_ip_address(ip):
-                errors.append(f"Row {row_number}: Invalid attacker IP address '{ip}'")
+                errors.append(f"Row {row_number}: Invalid destination IP address '{ip}'")
         
-        # Validate victim IP
-        victim_ip = row["victim_ip"].strip()
-        if not self._validate_ip_address(victim_ip):
-            errors.append(f"Row {row_number}: Invalid victim IP address '{victim_ip}'")
-        
-        # Validate victim port
-        victim_port_str = row["victim_port"].strip()
-        if not self._validate_port(victim_port_str):
-            errors.append(
-                f"Row {row_number}: Invalid victim port '{victim_port_str}' (must be 1-65535)"
-            )
-        
-        # Parse and validate attacker ports (optional)
-        attacker_ports = []
-        if "attacker_ports" in row and row["attacker_ports"].strip():
-            attacker_ports_str = row["attacker_ports"].strip()
-            attacker_ports_list = [
-                p.strip() for p in attacker_ports_str.split(";") if p.strip()
+        # Parse and validate destination ports (optional)
+        destination_ports = []
+        if "destination_ports" in row and row["destination_ports"].strip():
+            destination_ports_str = row["destination_ports"].strip()
+            destination_ports_list = [
+                p.strip() for p in destination_ports_str.split(";") if p.strip()
             ]
             
-            for port_str in attacker_ports_list:
+            for port_str in destination_ports_list:
                 if not self._validate_port(port_str):
                     errors.append(
-                        f"Row {row_number}: Invalid attacker port '{port_str}'"
+                        f"Row {row_number}: Invalid destination port '{port_str}'"
                     )
                 else:
-                    attacker_ports.append(int(port_str))
+                    destination_ports.append(int(port_str))
         
         # Validate TLP level (optional, default to green)
         tlp = row.get("tlp", "green").strip().lower()
@@ -233,11 +219,9 @@ class DDoSEventValidator:
         return {
             "event_name": event_name,
             "event_date": date_str,
-            "attacker_ips": attacker_ips,
-            "victim_ip": victim_ip,
-            "victim_port": int(victim_port_str),
-            "attacker_ports": attacker_ports if attacker_ports else None,
-            "description": description,
+            "destination_ips": destination_ips,
+            "destination_ports": destination_ports if destination_ports else None,
+            "annotation_text": annotation_text,
             "tlp": tlp if tlp else "green",
             "workflow_state": workflow_state
         }

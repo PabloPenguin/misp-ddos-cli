@@ -33,8 +33,8 @@ Automatically applies:
 - **Global Tags**: `tlp:green`, `information-security-indicators:incident-type="ddos"`, `misp-event-type:incident`
 - **MITRE ATT&CK**: `T1498` (Network DoS), `T1498.001` (Direct Flood), `T1498.002` (Amplification)
 - **Local Tags**: `workflow:state=new|in-progress|reviewed|closed`
-- **Structured Objects**: `ip-port` for attacker/victim IPs, `annotation` for descriptions
-- **Confidence Tagging**: Attacker IPs tagged with `confidence-level:high|medium|low`
+- **Structured Objects**: `ip-port` object with multiple `ip-dst` attributes, `annotation` for detailed information
+- **Streamlined Data**: Focus on destination IPs being targeted, with annotation objects for context
 
 ## 📋 Requirements
 
@@ -248,16 +248,14 @@ python main.py interactive
 ```
 Event name: DDoS Attack on Web Infrastructure
 Event date [2024-01-15]: 2024-01-15
-Description: Large-scale volumetric attack targeting web servers
-Attack type (1-3): 1  # direct-flood
-Victim IP: 10.0.50.100
-Victim port: 443
-Attacker IP #1: 192.168.1.100
-Attacker IP #2: 192.168.1.101
-Attacker IP #3: [Enter to finish]
+Annotation text: Large-scale volumetric attack targeting web infrastructure with sustained traffic
+Destination IP #1: 10.0.50.100
+Destination IP #2: 10.0.50.101
+Destination IP #3: [Enter to finish]
+Do you want to specify destination ports? [y/N]: y
+Port for 10.0.50.100: 443
+Port for 10.0.50.101: 80
 TLP level (1-4): 2  # green
-Workflow state (1-4): 1  # new
-Confidence level (1-3): 1  # high
 ```
 
 ### Bulk Upload Mode
@@ -324,23 +322,18 @@ Use the template at `templates/ddos_event_template.csv`:
 **Required Columns:**
 - `date` - Event date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
 - `event_name` - Event title/name
-- `attack_type` - Attack type: `direct-flood`, `amplification`, or `both`
-- `attacker_ips` - Semicolon-separated attacker IPs
-- `victim_ip` - Victim IP address
-- `victim_port` - Victim port number
-- `description` - Detailed attack description
+- `destination_ips` - Semicolon-separated destination IPs being targeted
+- `annotation_text` - Detailed annotation text about the attack
 
 **Optional Columns:**
 - `tlp` - TLP level: `clear`, `green`, `amber`, `red` (default: green)
-- `workflow_state` - State: `new`, `in-progress`, `reviewed`, `closed` (default: new)
-- `attacker_ports` - Semicolon-separated attacker ports
-- `confidence_level` - Confidence: `high`, `medium`, `low` (default: high)
+- `destination_ports` - Semicolon-separated destination ports
 
 **Example CSV:**
 ```csv
-date,event_name,tlp,workflow_state,attack_type,attacker_ips,attacker_ports,victim_ip,victim_port,description,confidence_level
-2024-01-15,DDoS Campaign Against Finance,green,new,direct-flood,192.168.1.100;192.168.1.101,80;443,10.0.0.50,443,Large-scale DDoS attack,high
-2024-01-16,Amplification Attack,green,new,amplification,192.168.2.50,53,10.0.0.51,80,DNS amplification,high
+date,event_name,tlp,destination_ips,destination_ports,annotation_text
+2024-01-15,DDoS Campaign Against Finance,green,10.0.0.50;10.0.0.51,443;80,Large-scale DDoS attack targeting financial infrastructure with sustained volumetric traffic
+2024-01-16,Amplification Attack,green,10.0.0.52,80,DNS amplification attack exploiting open resolvers with high amplification factor
 ```
 
 ### Advanced Options

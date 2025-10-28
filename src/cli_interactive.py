@@ -149,73 +149,42 @@ This tool will guide you through creating a properly structured DDoS event with:
             default=today
         )
         
-        # Description
-        self.console.print("\n[dim]Provide a detailed description of the DDoS attack[/dim]")
-        description = self._prompt_with_validation(
-            "[cyan]Description[/cyan]",
+        # Annotation text
+        self.console.print("\n[dim]Provide annotation text with detailed information about the DDoS attack[/dim]")
+        annotation_text = self._prompt_with_validation(
+            "[cyan]Annotation text[/cyan]",
             lambda x: len(x.strip()) > 0 and len(x.strip()) <= 5000,
-            "Description must be 1-5000 characters"
+            "Annotation text must be 1-5000 characters"
         )
         
-        # Victim information
-        self.console.print("\n[bold]🎯 Victim Information[/bold]\n")
+        # Destination IP information
+        self.console.print("\n[bold]🎯 Destination IP Information[/bold]\n")
+        self.console.print("[dim]Enter destination IPs being targeted (you'll be prompted for multiple)[/dim]\n")
         
-        victim_ip = self._prompt_with_validation(
-            "[cyan]Victim IP address[/cyan]",
-            self._validate_ip,
-            "Invalid IP address format"
-        )
-        
-        victim_port = self._prompt_with_validation(
-            "[cyan]Victim port[/cyan]",
-            self._validate_port,
-            "Port must be between 1 and 65535"
-        )
-        
-        # Attacker information
-        self.console.print("\n[bold]🔴 Attacker Information[/bold]\n")
-        self.console.print("[dim]Enter attacker IPs (you'll be prompted for multiple)[/dim]\n")
-        
-        attacker_ips = []
+        destination_ips = []
         while True:
             ip = self._prompt_with_validation(
-                f"[cyan]Attacker IP #{len(attacker_ips) + 1}[/cyan] [dim](press Enter when done)[/dim]",
+                f"[cyan]Destination IP #{len(destination_ips) + 1}[/cyan] [dim](press Enter when done)[/dim]",
                 lambda x: not x or self._validate_ip(x),
                 "Invalid IP address format",
                 allow_empty=True
             )
             
             if not ip:
-                if len(attacker_ips) == 0:
-                    self.console.print("[yellow]⚠️  At least one attacker IP is required[/yellow]")
+                if len(destination_ips) == 0:
+                    self.console.print("[yellow]⚠️  At least one destination IP is required[/yellow]")
                     continue
                 break
             
-            attacker_ips.append(ip)
+            destination_ips.append(ip)
             self.console.print(f"[green]✓ Added {ip}[/green]")
             
-            if len(attacker_ips) >= 1000:
+            if len(destination_ips) >= 1000:
                 self.console.print("[yellow]⚠️  Maximum 1000 IPs reached[/yellow]")
                 break
         
-        # Attacker ports (optional)
-        add_ports = Confirm.ask(
-            "\n[cyan]Do you want to specify attacker ports?[/cyan]",
-            default=False
-        )
-        
-        attacker_ports = []
-        if add_ports:
-            self.console.print(f"[dim]Enter ports for {len(attacker_ips)} attacker(s)[/dim]\n")
-            for idx in range(len(attacker_ips)):
-                port = self._prompt_with_validation(
-                    f"[cyan]Port for {attacker_ips[idx]}[/cyan] [dim](press Enter to skip)[/dim]",
-                    lambda x: not x or self._validate_port(x),
-                    "Port must be between 1 and 65535",
-                    allow_empty=True
-                )
-                if port:
-                    attacker_ports.append(int(port))
+        # Destination ports are not collected (not typically available)
+        destination_ports = None
         
         # TLP Level
         self.console.print("\n[bold]🏷️  Metadata[/bold]\n")
@@ -240,11 +209,9 @@ This tool will guide you through creating a properly structured DDoS event with:
         return {
             "event_name": event_name,
             "event_date": event_date,
-            "description": description,
-            "victim_ip": victim_ip,
-            "victim_port": int(victim_port),
-            "attacker_ips": attacker_ips,
-            "attacker_ports": attacker_ports if attacker_ports else None,
+            "annotation_text": annotation_text,
+            "destination_ips": destination_ips,
+            "destination_ports": destination_ports if destination_ports else None,
             "tlp": tlp,
             "workflow_state": workflow_state
         }
@@ -264,16 +231,10 @@ This tool will guide you through creating a properly structured DDoS event with:
         
         table.add_row("Event Name", event_data["event_name"])
         table.add_row("Date", event_data["event_date"])
-        table.add_row("Victim IP", event_data["victim_ip"])
-        table.add_row("Victim Port", str(event_data["victim_port"]))
-        table.add_row("Attacker IPs", f"{len(event_data['attacker_ips'])} IP(s)")
-        
-        if event_data["attacker_ports"]:
-            table.add_row("Attacker Ports", f"{len(event_data['attacker_ports'])} port(s)")
-        
+        table.add_row("Destination IPs", f"{len(event_data['destination_ips'])} IP(s)")
         table.add_row("TLP Level", event_data["tlp"])
         table.add_row("Workflow State", "new")  # Always "new" - SOC analysts update during peer review
-        table.add_row("Description", event_data["description"][:100] + "..." if len(event_data["description"]) > 100 else event_data["description"])
+        table.add_row("Annotation", event_data["annotation_text"][:100] + "..." if len(event_data["annotation_text"]) > 100 else event_data["annotation_text"])
         
         self.console.print(table)
     

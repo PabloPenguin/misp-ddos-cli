@@ -180,15 +180,12 @@ Follow the prompts:
 ```
 Event name: Test DDoS Event
 Event date [2024-10-26]: [press Enter]
-Description: Testing MISP CLI tool
-Attack type: 1  # direct-flood
-Victim IP: 10.0.0.1
-Victim port: 443
-Attacker IP #1: 192.168.1.100
-Attacker IP #2: [press Enter to finish]
+Annotation text: Testing MISP CLI tool with sample DDoS event data
+Destination IP #1: 10.0.0.1
+Destination IP #2: [press Enter to finish]
+Do you want to specify destination ports? [y/N]: y
+Port for 10.0.0.1: 443
 TLP level: 2  # green
-Workflow state: 1  # new
-Confidence level: 1  # high
 Submit? [Y/n]: Y
 ```
 
@@ -228,9 +225,9 @@ python main.py export --pretty
 Create `test_events.csv`:
 
 ```csv
-date,event_name,tlp,workflow_state,attack_type,attacker_ips,attacker_ports,victim_ip,victim_port,description,confidence_level
-2024-10-26,Test Event 1,green,new,direct-flood,192.168.1.100,80,10.0.0.1,443,Test DDoS attack,high
-2024-10-26,Test Event 2,green,new,amplification,192.168.1.101,53,10.0.0.2,53,DNS amplification test,high
+date,event_name,tlp,destination_ips,destination_ports,annotation_text
+2024-10-26,Test Event 1,green,10.0.0.1;10.0.0.2,443;80,Test DDoS attack targeting infrastructure with volumetric traffic
+2024-10-26,Test Event 2,green,10.0.0.3,53,DNS amplification test using open resolvers
 ```
 
 Then upload:

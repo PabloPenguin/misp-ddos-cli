@@ -286,11 +286,9 @@ class MISPClient:
         self,
         event_name: str,
         event_date: str,
-        attacker_ips: List[str],
-        victim_ip: str,
-        victim_port: int,
-        attacker_ports: Optional[List[int]] = None,
-        description: str = "",
+        destination_ips: List[str],
+        destination_ports: Optional[List[int]] = None,
+        annotation_text: str = "",
         tlp: str = "green",
         workflow_state: str = "new"
     ) -> Dict[str, Any]:
@@ -300,11 +298,9 @@ class MISPClient:
         Args:
             event_name: Name/title of the DDoS event
             event_date: Date of the event (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)
-            attacker_ips: List of attacker IP addresses
-            victim_ip: Victim IP address
-            victim_port: Victim port number
-            attacker_ports: Optional list of attacker ports
-            description: Detailed description of the attack
+            destination_ips: List of destination IP addresses being targeted
+            destination_ports: Optional list of destination ports
+            annotation_text: Annotation text with detailed information about the attack
             tlp: Traffic Light Protocol level (clear, green, amber, red)
             workflow_state: Workflow state (always "new" for event creation)
         
@@ -320,10 +316,8 @@ class MISPClient:
             >>> event = client.create_ddos_event(
             ...     event_name="DDoS Attack on Web Server",
             ...     event_date="2024-01-15",
-            ...     attacker_ips=["192.168.1.100", "192.168.1.101"],
-            ...     victim_ip="10.0.0.50",
-            ...     victim_port=443,
-            ...     description="Large-scale DDoS attack"
+            ...     destination_ips=["192.168.1.100", "192.168.1.101"],
+            ...     annotation_text="Large-scale DDoS attack targeting infrastructure"
             ... )
         """
         start_time = time.time()
@@ -332,8 +326,7 @@ class MISPClient:
             extra={
                 "event_name": event_name,
                 "event_date": event_date,
-                "attacker_count": len(attacker_ips),
-                "victim_ip": victim_ip
+                "destination_count": len(destination_ips)
             }
         )
         
@@ -344,19 +337,13 @@ class MISPClient:
         if not isinstance(event_date, str) or not event_date.strip():
             raise MISPValidationError("Event date must be a non-empty string")
         
-        if not isinstance(attacker_ips, list) or not attacker_ips:
-            raise MISPValidationError("Attacker IPs must be a non-empty list")
+        if not isinstance(destination_ips, list) or not destination_ips:
+            raise MISPValidationError("Destination IPs must be a non-empty list")
         
-        if not isinstance(victim_ip, str) or not self._validate_ip_address(victim_ip):
-            raise MISPValidationError(f"Invalid victim IP address: {victim_ip}")
-        
-        if not self._validate_port(victim_port):
-            raise MISPValidationError(f"Invalid victim port: {victim_port}")
-        
-        # Validate all attacker IPs
-        for ip in attacker_ips:
+        # Validate all destination IPs
+        for ip in destination_ips:
             if not isinstance(ip, str) or not self._validate_ip_address(ip):
-                raise MISPValidationError(f"Invalid attacker IP address: {ip}")
+                raise MISPValidationError(f"Invalid destination IP address: {ip}")
         
         # Validate TLP level
         tlp_lower = tlp.lower()
@@ -389,32 +376,27 @@ class MISPClient:
             # Add local workflow tag (always "new" for event creation)
             event.add_tag(f"{self.LOCAL_WORKFLOW_TAG_PREFIX}new")
             
-            # Create annotation object for description
-            if description:
+            # Create annotation object for annotation text
+            if annotation_text:
                 annotation = MISPObject("annotation")
-                annotation.add_attribute("text", value=description)
+                annotation.add_attribute("text", value=annotation_text)
                 event.add_object(annotation)
             
-            # Create ip-port objects for attackers (no confidence tagging)
-            for idx, attacker_ip in enumerate(attacker_ips):
-                ip_port_obj = MISPObject("ip-port")
-                ip_port_obj.add_attribute("ip", value=attacker_ip)
+            # Create ONE big ip-port object with all destination IPs
+            ip_port_obj = MISPObject("ip-port")
+            
+            # Add all destination IPs as ip-dst attributes
+            for idx, dest_ip in enumerate(destination_ips):
+                ip_port_obj.add_attribute("ip-dst", value=dest_ip)
                 
-                # Add port if available
-                if attacker_ports and idx < len(attacker_ports):
-                    port = attacker_ports[idx]
+                # Add port if available for this IP
+                if destination_ports and idx < len(destination_ports):
+                    port = destination_ports[idx]
                     if self._validate_port(port):
                         ip_port_obj.add_attribute("dst-port", value=str(port))
-                
-                ip_port_obj.comment = f"Attacker IP {idx + 1}"
-                event.add_object(ip_port_obj)
             
-            # Create ip-port object for victim
-            victim_obj = MISPObject("ip-port")
-            victim_obj.add_attribute("ip", value=victim_ip)
-            victim_obj.add_attribute("dst-port", value=str(victim_port))
-            victim_obj.comment = "Victim IP and Port"
-            event.add_object(victim_obj)
+            ip_port_obj.comment = "Destination IPs and Ports"
+            event.add_object(ip_port_obj)
             
             # Add event to MISP
             response = self.client.add_event(event, pythonify=True)

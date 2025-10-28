@@ -64,15 +64,12 @@ python main.py interactive
 ```
 Event name: Web Server DDoS Attack
 Event date [2024-10-26]: 2024-10-26
-Description: HTTP flood targeting e-commerce platform
-Attack type (1-3): 1  # direct-flood
-Victim IP: 203.0.113.50
-Victim port: 443
-Attacker IP #1: 198.51.100.10
-Attacker IP #2: [press Enter]
+Annotation text: HTTP flood targeting e-commerce platform with sustained volumetric traffic
+Destination IP #1: 203.0.113.50
+Destination IP #2: [press Enter]
+Do you want to specify destination ports? [y/N]: y
+Port for 203.0.113.50: 443
 TLP level (1-4): 2  # green
-Workflow state (1-4): 1  # new
-Confidence level (1-3): 1  # high
 Submit this event to MISP? [Y/n]: Y
 ```
 
@@ -97,21 +94,16 @@ python main.py interactive
 ```
 Event name: Multi-Vector DDoS Campaign
 Event date: 2024-10-26 14:30:00
-Description: Coordinated attack from botnet targeting DNS and web services
-Attack type: 3  # both (direct-flood and amplification)
-Victim IP: 203.0.113.100
-Victim port: 53
-Attacker IP #1: 198.51.100.20
-Attacker IP #2: 198.51.100.21
-Attacker IP #3: 198.51.100.22
-Attacker IP #4: [press Enter]
-Specify attacker ports? [y/N]: y
-Port for 198.51.100.20: 53
-Port for 198.51.100.21: 80
-Port for 198.51.100.22: 443
+Annotation text: Coordinated attack from botnet targeting DNS and web services infrastructure
+Destination IP #1: 203.0.113.100
+Destination IP #2: 203.0.113.101
+Destination IP #3: 203.0.113.102
+Destination IP #4: [press Enter]
+Specify destination ports? [y/N]: y
+Port for 203.0.113.100: 53
+Port for 203.0.113.101: 80
+Port for 203.0.113.102: 443
 TLP level: 2  # green
-Workflow state: 2  # in-progress
-Confidence level: 1  # high
 ```
 
 ### Example 3: High-Sensitivity Event
@@ -126,15 +118,12 @@ python main.py interactive
 ```
 Event name: Nation-State APT DDoS
 Event date: 2024-10-26
-Description: Suspected nation-state actor conducting reconnaissance via DDoS
-Attack type: 1  # direct-flood
-Victim IP: 203.0.113.200
-Victim port: 443
-Attacker IP #1: 198.51.100.50
-Attacker IP #2: [press Enter]
+Annotation text: Suspected nation-state actor conducting reconnaissance via DDoS with sophisticated patterns
+Destination IP #1: 203.0.113.200
+Destination IP #2: [press Enter]
+Do you want to specify destination ports? [y/N]: y
+Port for 203.0.113.200: 443
 TLP level: 4  # red (restricted sharing)
-Workflow state: 2  # in-progress
-Confidence level: 2  # medium
 ```
 
 ## Bulk Upload Examples
@@ -153,10 +142,10 @@ python main.py bulk events.csv
 
 **Sample CSV (events.csv):**
 ```csv
-date,event_name,tlp,workflow_state,attack_type,attacker_ips,attacker_ports,victim_ip,victim_port,description,confidence_level
-2024-10-26,Retail DDoS Wave 1,green,new,direct-flood,198.51.100.10;198.51.100.11,80;443,203.0.113.10,443,First wave of retail sector attacks,high
-2024-10-26,Retail DDoS Wave 2,green,new,direct-flood,198.51.100.12;198.51.100.13,,203.0.113.11,80,Second wave targeting checkout systems,high
-2024-10-27,DNS Amplification,green,new,amplification,198.51.100.20,53,203.0.113.20,53,DNS amplification attack,high
+date,event_name,tlp,destination_ips,destination_ports,annotation_text
+2024-10-26,Retail DDoS Wave 1,green,203.0.113.10;203.0.113.11,443;80,First wave of retail sector attacks targeting e-commerce infrastructure
+2024-10-26,Retail DDoS Wave 2,green,203.0.113.12;203.0.113.13,,Second wave targeting checkout systems with sustained traffic
+2024-10-27,DNS Amplification,green,203.0.113.20,53,DNS amplification attack exploiting open resolvers
 ```
 
 **Output:**
