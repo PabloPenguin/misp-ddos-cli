@@ -64,11 +64,11 @@ python main.py interactive
 ```
 Event name: Web Server DDoS Attack
 Event date [2024-10-26]: 2024-10-26
-Annotation text: HTTP flood targeting e-commerce platform with sustained volumetric traffic
-Destination IP #1: 203.0.113.50
-Destination IP #2: [press Enter]
-Do you want to specify destination ports? [y/N]: y
-Port for 203.0.113.50: 443
+Annotation text: HTTP flood from botnet targeting e-commerce platform with sustained volumetric traffic
+Attacker IP #1: 203.0.113.50
+Attacker IP #2: 203.0.113.51
+Attacker IP #3: [press Enter to finish]
+Destination IP #1 (Optional): [press Enter to skip]
 TLP level (1-4): 2  # green
 Submit this event to MISP? [Y/n]: Y
 ```
@@ -94,15 +94,13 @@ python main.py interactive
 ```
 Event name: Multi-Vector DDoS Campaign
 Event date: 2024-10-26 14:30:00
-Annotation text: Coordinated attack from botnet targeting DNS and web services infrastructure
-Destination IP #1: 203.0.113.100
-Destination IP #2: 203.0.113.101
-Destination IP #3: 203.0.113.102
-Destination IP #4: [press Enter]
-Specify destination ports? [y/N]: y
-Port for 203.0.113.100: 53
-Port for 203.0.113.101: 80
-Port for 203.0.113.102: 443
+Annotation text: Coordinated botnet attack targeting critical infrastructure services
+Attacker IP #1: 203.0.113.100
+Attacker IP #2: 203.0.113.101
+Attacker IP #3: 203.0.113.102
+Attacker IP #4: 203.0.113.103
+Attacker IP #5: [press Enter to finish]
+Destination IP #1 (Optional): [press Enter to skip]
 TLP level: 2  # green
 ```
 
@@ -119,10 +117,10 @@ python main.py interactive
 Event name: Nation-State APT DDoS
 Event date: 2024-10-26
 Annotation text: Suspected nation-state actor conducting reconnaissance via DDoS with sophisticated patterns
-Destination IP #1: 203.0.113.200
-Destination IP #2: [press Enter]
-Do you want to specify destination ports? [y/N]: y
-Port for 203.0.113.200: 443
+Attacker IP #1: 203.0.113.200
+Attacker IP #2: 203.0.113.201
+Attacker IP #3: [press Enter to finish]
+Destination IP #1 (Optional): [press Enter to skip]
 TLP level: 4  # red (restricted sharing)
 ```
 
@@ -403,27 +401,29 @@ templates/ddos_event_template.csv
   - `amplification`: Reflection/amplification (T1498.002)
   - `both`: Both attack types
 
-**attacker_ips**
+**attacker_ips** (REQUIRED)
 - Format: Semicolon-separated IP addresses
-- Example: `192.168.1.100;192.168.1.101;192.168.1.102`
-- Description: Source IPs of the attack
+- Example: `203.0.113.10;203.0.113.11;198.51.100.20`
+- Description: Source/attacker IPs launching the DDoS attack
 - Supports: IPv4 and IPv6
 - Limit: Maximum 1000 IPs per event
 
-**victim_ip**
-- Format: Single IP address
-- Example: `10.0.50.100`
-- Description: Target IP of the attack
+**destination_ips** (OPTIONAL)
+- Format: Semicolon-separated IP addresses
+- Example: `10.0.50.100;10.0.50.101`
+- Description: Target/destination IPs being attacked (usually not shared with external orgs)
+- Supports: IPv4 and IPv6
+- Limit: Maximum 1000 IPs per event
 
-**victim_port**
-- Format: Integer (1-65535)
-- Example: `443`
-- Description: Target port of the attack
+**destination_ports** (OPTIONAL)
+- Format: Semicolon-separated integers (1-65535)
+- Example: `443;80;8080`
+- Description: Target ports being attacked (usually not available)
 
-**description**
+**annotation_text** (REQUIRED)
 - Format: String (max 5000 characters)
-- Example: `Large-scale volumetric attack targeting web infrastructure`
-- Description: Detailed description of the attack
+- Example: `Large-scale volumetric attack from botnet infrastructure targeting critical services`
+- Description: Detailed annotation about the DDoS attack
 
 #### Optional Fields
 
@@ -598,11 +598,11 @@ Invalid attacker IP address: '999.999.999.999'
 **Error:**
 ```
 ❌ CSV Validation Error:
-CSV missing required columns: {'attacker_ips', 'victim_ip'}
+CSV missing required columns: {'date', 'annotation_text'}
 ```
 
 **Solutions:**
-1. Verify CSV has all required column headers
+1. Verify CSV has all required column headers: date, event_name, attacker_ips, annotation_text
 2. Check spelling of column names (case-sensitive)
 3. Use provided template as reference
 4. Ensure no extra spaces in headers

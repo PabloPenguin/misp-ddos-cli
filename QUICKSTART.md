@@ -180,11 +180,11 @@ Follow the prompts:
 ```
 Event name: Test DDoS Event
 Event date [2024-10-26]: [press Enter]
-Annotation text: Testing MISP CLI tool with sample DDoS event data
-Destination IP #1: 10.0.0.1
-Destination IP #2: [press Enter to finish]
-Do you want to specify destination ports? [y/N]: y
-Port for 10.0.0.1: 443
+Annotation text: Testing MISP CLI tool with sample botnet attack data
+Attacker IP #1: 203.0.113.10
+Attacker IP #2: 203.0.113.11
+Attacker IP #3: [press Enter to finish]
+Destination IP #1 (Optional): [press Enter to skip]
 TLP level: 2  # green
 Submit? [Y/n]: Y
 ```

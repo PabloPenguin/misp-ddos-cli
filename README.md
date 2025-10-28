@@ -33,8 +33,8 @@ Automatically applies:
 - **Global Tags**: `tlp:green`, `information-security-indicators:incident-type="ddos"`, `misp-event-type:incident`
 - **MITRE ATT&CK**: `T1498` (Network DoS), `T1498.001` (Direct Flood), `T1498.002` (Amplification)
 - **Local Tags**: `workflow:state=new|in-progress|reviewed|closed`
-- **Structured Objects**: `ip-port` object with multiple `ip-dst` attributes, `annotation` for detailed information
-- **Streamlined Data**: Focus on destination IPs being targeted, with annotation objects for context
+- **Structured Objects**: `ip-port` object with `ip-src` attributes for attackers and optional `ip-dst` for destinations, `annotation` for detailed information
+- **Streamlined Data**: Focus on attacker IPs (threat intelligence sharing), with optional destination IPs and annotation objects for context
 
 ## 📋 Requirements
 
@@ -246,15 +246,13 @@ python main.py interactive
 
 **Example Session:**
 ```
-Event name: DDoS Attack on Web Infrastructure
+Event name: DDoS Attack from Botnet Infrastructure
 Event date [2024-01-15]: 2024-01-15
-Annotation text: Large-scale volumetric attack targeting web infrastructure with sustained traffic
-Destination IP #1: 10.0.50.100
-Destination IP #2: 10.0.50.101
-Destination IP #3: [Enter to finish]
-Do you want to specify destination ports? [y/N]: y
-Port for 10.0.50.100: 443
-Port for 10.0.50.101: 80
+Annotation text: Large-scale volumetric attack from known botnet infrastructure with sustained traffic
+Attacker IP #1: 203.0.113.10
+Attacker IP #2: 203.0.113.11
+Attacker IP #3: [Enter to finish]
+Destination IP #1 (Optional): [press Enter to skip]
 TLP level (1-4): 2  # green
 ```
 
@@ -327,8 +325,8 @@ Use the template at `templates/ddos_event_template.csv`:
 
 **Optional Columns:**
 - `tlp` - TLP level: `clear`, `green`, `amber`, `red` (default: green)
-- `destination_ips` - Semicolon-separated destination IPs being targeted
-- `destination_ports` - Semicolon-separated destination ports
+- `destination_ips` - Semicolon-separated destination IPs being targeted (usually not shared)
+- `destination_ports` - Semicolon-separated destination ports (usually not shared)
 
 **Example CSV:**
 ```csv

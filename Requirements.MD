@@ -606,7 +606,7 @@ Optional if relevant: mitre-attack-pattern:T1498.001 — Direct Flood
 mitre-attack-pattern:T1498.002 — Amplification
 1. Objects (Preferred over Attribute events) (Structured Evidence)
 annotation → analyst description (always include).
-ip-port → attacker/victim IPs with port context.
+ip-port → attacker source IPs (ip-src) and optional destination IPs (ip-dst) with port context.
 Global Event Tags:
 tlp:green
 information-security-indicators:incident-type="ddos"
@@ -644,8 +644,8 @@ A production-ready CLI tool with API access to MISP instance that enables:
 
 **CSV Template:**
 - Location: `templates/ddos_event_template.csv`
-- Required fields: date, event_name, attack_type, attacker_ips, victim_ip, victim_port, description
-- Optional fields: tlp, workflow_state, attacker_ports, confidence_level
+- Required fields: date, event_name, attacker_ips, annotation_text
+- Optional fields: tlp, destination_ips, destination_ports
 - Sample data: `templates/sample_events.csv`
 
 **Security Implementation:**
