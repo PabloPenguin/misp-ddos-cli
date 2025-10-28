@@ -226,9 +226,6 @@ This tool will guide you through creating a properly structured DDoS event with:
         )
         tlp = tlp_map[tlp_choice]
         
-        # Workflow state is always "new" - SOC analysts will update during peer review
-        workflow_state = "new"
-        
         return {
             "event_name": event_name,
             "event_date": event_date,
@@ -236,8 +233,7 @@ This tool will guide you through creating a properly structured DDoS event with:
             "attacker_ips": attacker_ips,
             "destination_ips": destination_ips if destination_ips else None,
             "destination_ports": destination_ports if destination_ports else None,
-            "tlp": tlp,
-            "workflow_state": workflow_state
+            "tlp": tlp
         }
     
     def display_summary(self, event_data: dict) -> None:
@@ -259,7 +255,7 @@ This tool will guide you through creating a properly structured DDoS event with:
         if event_data.get('destination_ips'):
             table.add_row("Destination IPs", f"{len(event_data['destination_ips'])} IP(s)")
         table.add_row("TLP Level", event_data["tlp"])
-        table.add_row("Workflow State", "new")  # Always "new" - SOC analysts update during peer review
+        table.add_row("Workflow State", "draft")  # Always "draft" - LLM will review and update automatically
         table.add_row("Annotation", event_data["annotation_text"][:100] + "..." if len(event_data["annotation_text"]) > 100 else event_data["annotation_text"])
         
         self.console.print(table)

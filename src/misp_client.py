@@ -111,16 +111,11 @@ class MISPClient:
     """
     
     # MISP DDoS Playbook Constants
-    MANDATORY_GLOBAL_TAGS = [
-        "tlp:green",  # Default TLP, can be overridden
-        "information-security-indicators:incident-type=\"ddos\"",
-        "misp-event-type:incident"
-    ]
+    # Using only standard MISP taxonomies that actually exist
     
-    LOCAL_WORKFLOW_TAG_PREFIX = "workflow:state="
+    LOCAL_WORKFLOW_TAG = "workflow:state=\"draft\""
     
-    # MITRE ATT&CK T1498 - Network Denial of Service (DDoS-specific)
-    MITRE_ATTACK_PATTERN = "mitre-attack-pattern:T1498"
+    # MITRE ATT&CK T1498 Galaxy Cluster - Network Denial of Service (DDoS-specific)
     MITRE_GALAXY_CLUSTER = 'misp-galaxy:mitre-attack-pattern="Network Denial of Service - T1498"'
     
     VALID_TLP_LEVELS = ["clear", "green", "amber", "red"]
@@ -290,8 +285,7 @@ class MISPClient:
         destination_ips: Optional[List[str]] = None,
         destination_ports: Optional[List[int]] = None,
         annotation_text: str = "",
-        tlp: str = "green",
-        workflow_state: str = "new"
+        tlp: str = "green"
     ) -> Dict[str, Any]:
         """
         Create a DDoS event in MISP following the Streamlined DDoS Playbook.
@@ -304,7 +298,6 @@ class MISPClient:
             destination_ports: Optional list of destination ports
             annotation_text: Annotation text with detailed information about the attack
             tlp: Traffic Light Protocol level (clear, green, amber, red)
-            workflow_state: Workflow state (always "new" for event creation)
         
         Returns:
             Dictionary containing the created event details
@@ -312,6 +305,12 @@ class MISPClient:
         Raises:
             MISPValidationError: If input validation fails
             MISPConnectionError: If event creation fails
+        
+        Note:
+            Events are automatically tagged with:
+            - tlp:{level} (user's choice)
+            - workflow:state="draft" (LLM will review and update)
+            - MITRE ATT&CK T1498 galaxy cluster (Network Denial of Service)
         
         Examples:
             >>> client = MISPClient(url, api_key)
@@ -371,20 +370,15 @@ class MISPClient:
             event.info = event_name
             event.date = event_date
             
-            # Add mandatory global tags
+            # Add TLP tag (user's choice - standard taxonomy)
             event.add_tag(f"tlp:{tlp_lower}")
-            event.add_tag("information-security-indicators:incident-type=\"ddos\"")
-            event.add_tag("misp-event-type:incident")
-            
-            # Add MITRE ATT&CK T1498 tag (Network Denial of Service)
-            event.add_tag(self.MITRE_ATTACK_PATTERN)
             
             # Add MITRE ATT&CK T1498 Galaxy Cluster (Network Denial of Service)
             event.add_tag(self.MITRE_GALAXY_CLUSTER)
-            logger.debug("Added T1498 Network Denial of Service tag and galaxy cluster")
+            logger.debug("Added T1498 Network Denial of Service galaxy cluster")
             
-            # Add local workflow tag (always "new" for event creation)
-            event.add_tag(f"{self.LOCAL_WORKFLOW_TAG_PREFIX}new")
+            # Add workflow tag (automatically set to "draft" - LLM will review and update later)
+            event.add_tag(self.LOCAL_WORKFLOW_TAG)
             
             # Create annotation object for annotation text
             if annotation_text:

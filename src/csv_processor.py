@@ -224,10 +224,6 @@ class DDoSEventValidator:
                 f"Must be one of {self.VALID_TLP_LEVELS}"
             )
         
-        # Workflow state is always "new" - ignore CSV value if provided
-        # SOC analysts will update workflow state during peer review
-        workflow_state = "new"
-        
         if errors:
             raise CSVValidationError("\n".join(errors))
         
@@ -239,8 +235,7 @@ class DDoSEventValidator:
             "destination_ips": destination_ips if destination_ips else None,
             "destination_ports": destination_ports if destination_ports else None,
             "annotation_text": annotation_text,
-            "tlp": tlp if tlp else "green",
-            "workflow_state": workflow_state
+            "tlp": tlp if tlp else "green"
         }
 
 
